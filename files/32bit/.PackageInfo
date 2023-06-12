@@ -1,0 +1,54 @@
+name			cudatext_x86
+version			1.195.0.6-1
+architecture		x86_gcc2
+summary			"The Cross Platform code and text editor"
+description		"CudaText is a cross-platform text editor, written in Object Pascal.
+It is open source project and can be used free of charge, even for business.
+It starts quite fast: ~0.3 sec with ~30 plugins, on Linux on CPU Intel Core i3 3Hz.
+It is extensible by Python add-ons: plugins, linters, code tree parsers, external tools.
+Syntax parser is feature-rich, based on EControl engine (though not as fast as in some competitors).
+
+Features:
+* Syntax highlight for lot of languages (250+ lexers).
+* Code tree: structure of functions/classes/etc, if lexer allows it.
+* Code folding.
+* Multi-carets and multi-selections.
+* Find/Replace with regular expressions.
+* Configs in JSON format. Including lexer-specific configs.
+* Tabbed UI.
+* Split view to primary/secondary. Split window to 2/3/4/6 groups of tabs.
+* Command palette, with fuzzy matching.
+* Minimap. Micromap.
+* Show unprinted whitespace.
+* Support for many encodings.
+* Customizable hotkeys.
+* Binary/Hex viewer for files of unlimited size (can show 10 Gb logs).
+* Correctly saves binary files."
+packager		"Begasus <begasus@gmail.com>"
+vendor			"Haiku Project"
+licenses {
+	"MPL v2.0"
+}
+copyrights {
+	"2023 Alexey-T"
+}
+provides {
+	cudatext_x86 = 1.195.0.6
+	app:cudatext
+}
+requires {
+	haiku_x86 >= r1~beta4_hrev56578_86-1
+	lib:libiconv_x86 >= 2.6.1
+	lib:libpython3.9_x86 >= 1.0
+	lib:libqt5pas_x86 >= 1.2.10
+}
+urls {
+	"https://cudatext.github.io/"
+	"https://github.com/Alexey-T/CudaText"
+}
+source-urls {
+# Download
+	"https://github.com/Begasus/CudaText-Haikuports//archive/cc5ec43337462d8274d68408ce20430e589a865c.tar.gz"
+# Location 2
+	"https://ports-mirror.haiku-os.org/cudatext/cc5ec43337462d8274d68408ce20430e589a865c.tar.gz"
+}

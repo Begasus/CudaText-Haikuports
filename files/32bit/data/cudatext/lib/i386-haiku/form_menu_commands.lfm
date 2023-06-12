@@ -1,0 +1,93 @@
+object fmCommands: TfmCommands
+  Left = 182
+  Height = 248
+  Top = 483
+  Width = 500
+  BorderIcons = [biSystemMenu, biMaximize]
+  BorderStyle = bsNone
+  Caption = 'Commands'
+  ClientHeight = 248
+  ClientWidth = 500
+  DefaultMonitor = dmMainForm
+  KeyPreview = True
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnKeyDown = FormKeyDown
+  OnShow = FormShow
+  ShowInTaskBar = stNever
+  LCLVersion = '2.3.0.0'
+  object edit: TATEdit
+    Left = 6
+    Height = 26
+    Top = 32
+    Width = 488
+    Align = alTop
+    BorderSpacing.Around = 6
+    DoubleBuffered = True
+    Font.Height = -12
+    Font.Name = 'Courier New'
+    ParentFont = False
+    TabOrder = 0
+    TabStop = True
+    OnChange = editChange
+    WantTabs = False
+    WantReturns = False
+    OptScrollStyleHorz = Hide
+    OptScrollStyleVert = Hide
+    OptScrollIndentCaretHorz = 0
+    OptShowURLs = False
+    OptShowMouseSelFrame = False
+    OptCaretManyAllowed = False
+    OptCaretVirtual = False
+    OptGutterVisible = False
+    OptRulerVisible = False
+    OptMarginRight = 1000
+    OptUnprintedVisible = False
+    OptMouseDragDrop = False
+    OptMouseMiddleClickAction = None
+    OptMouseWheelZooms = False
+    OptAllowReadOnly = False
+    OptUndoLimit = 200
+  end
+  object list: TATListbox
+    Left = 6
+    Height = 178
+    Top = 64
+    Width = 488
+    Align = alClient
+    BorderSpacing.Around = 6
+    OwnerDrawn = True
+    ParentColor = False
+    ParentFont = False
+    OnClick = listClick
+    OnDrawItem = listDrawItem
+  end
+  object PanelCaption: TPanel
+    Left = 0
+    Height = 26
+    Top = 0
+    Width = 500
+    Align = alTop
+    BevelOuter = bvNone
+    Caption = 'Caption'
+    ClientHeight = 26
+    ClientWidth = 500
+    TabOrder = 2
+    Visible = False
+    object ButtonCancel: TATButton
+      Left = 480
+      Height = 26
+      Top = 0
+      Width = 20
+      Align = alRight
+      Caption = ' '
+      TabOrder = 0
+      Focusable = False
+      Flat = True
+      Arrow = True
+      ArrowKind = abakCross
+      ArrowAlign = taCenter
+      OnClick = ButtonCancelClick
+    end
+  end
+end

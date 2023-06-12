@@ -1,0 +1,76 @@
+object fmGoto: TfmGoto
+  Left = 404
+  Height = 84
+  Top = 521
+  Width = 453
+  BorderStyle = bsNone
+  Caption = 'Goto'
+  ClientHeight = 84
+  ClientWidth = 453
+  KeyPreview = True
+  OnCreate = FormCreate
+  OnKeyDown = FormKeyDown
+  OnShow = FormShow
+  ShowInTaskBar = stNever
+  LCLVersion = '2.3.0.0'
+  Scaled = False
+  object edInput: TATEdit
+    AnchorSideBottom.Side = asrBottom
+    Left = 6
+    Height = 28
+    Top = 32
+    Width = 441
+    Align = alTop
+    Anchors = []
+    BorderSpacing.Around = 6
+    BorderStyle = bsSingle
+    DoubleBuffered = True
+    Font.Height = -12
+    Font.Name = 'Courier New'
+    ParentFont = False
+    TabOrder = 0
+    TabStop = True
+    WantTabs = False
+    WantReturns = False
+    OptScrollStyleHorz = Hide
+    OptScrollStyleVert = Hide
+    OptScrollIndentCaretHorz = 0
+    OptShowURLs = False
+    OptShowMouseSelFrame = False
+    OptCaretManyAllowed = False
+    OptCaretVirtual = False
+    OptGutterVisible = False
+    OptRulerVisible = False
+    OptMarginRight = 1000
+    OptUnprintedVisible = False
+    OptMouseDragDrop = False
+    OptMouseMiddleClickAction = None
+    OptMouseWheelZooms = False
+    OptAllowReadOnly = False
+    OptUndoLimit = 200
+  end
+  object plCaption: TPanel
+    Left = 0
+    Height = 26
+    Top = 0
+    Width = 453
+    Align = alTop
+    BevelOuter = bvNone
+    Caption = 'go to'
+    ClientHeight = 26
+    ClientWidth = 453
+    TabOrder = 1
+    object ButtonCancel: TATButton
+      Left = 433
+      Height = 26
+      Top = 0
+      Width = 20
+      Align = alRight
+      Caption = 'x'
+      TabOrder = 0
+      Focusable = False
+      Flat = True
+      OnClick = ButtonCancelClick
+    end
+  end
+end

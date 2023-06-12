@@ -1,0 +1,80 @@
+object fmAbout: TfmAbout
+  Left = 482
+  Height = 270
+  Top = 443
+  Width = 465
+  ActiveControl = ButtonPanel1
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'About'
+  ClientHeight = 270
+  ClientWidth = 465
+  KeyPreview = True
+  OnCreate = FormCreate
+  OnKeyDown = FormKeyDown
+  OnShow = FormShow
+  Position = poDesktopCenter
+  ShowInTaskBar = stNever
+  LCLVersion = '2.3.0.0'
+  Scaled = False
+  object labelName: TLabel
+    Left = 152
+    Height = 17
+    Top = 64
+    Width = 62
+    Caption = 'CudaText'
+  end
+  object labelVersion: TLabel
+    AnchorSideLeft.Control = labelName
+    AnchorSideTop.Control = labelName
+    AnchorSideTop.Side = asrBottom
+    Left = 152
+    Height = 17
+    Top = 93
+    Width = 51
+    BorderSpacing.Top = 12
+    Caption = 'Version'
+  end
+  object labelPlatform: TLabel
+    AnchorSideLeft.Control = labelName
+    AnchorSideTop.Control = labelVersion
+    AnchorSideTop.Side = asrBottom
+    Left = 152
+    Height = 17
+    Top = 113
+    Width = 61
+    BorderSpacing.Top = 3
+    Caption = 'Platform'
+  end
+  object ButtonPanel1: TButtonPanel
+    Left = 6
+    Height = 33
+    Top = 231
+    Width = 453
+    OKButton.Name = 'OKButton'
+    OKButton.DefaultCaption = True
+    HelpButton.Name = 'HelpButton'
+    HelpButton.Caption = '&Credits'
+    HelpButton.OnClick = bCreditsClick
+    CloseButton.Name = 'CloseButton'
+    CloseButton.DefaultCaption = True
+    CancelButton.Name = 'CancelButton'
+    CancelButton.DefaultCaption = True
+    TabOrder = 0
+    ShowButtons = [pbOK, pbHelp]
+    ShowGlyphs = []
+    ShowBevel = False
+  end
+  object btnCopyToClp: TSpeedButton
+    AnchorSideTop.Control = labelVersion
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 419
+    Height = 40
+    Top = 93
+    Width = 40
+    Anchors = [akTop, akRight]
+    BorderSpacing.Right = 6
+    OnClick = btnCopyToClpClick
+  end
+end
