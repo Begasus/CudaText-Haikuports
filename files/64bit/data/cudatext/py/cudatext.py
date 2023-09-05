@@ -308,6 +308,17 @@ PROP_MINIMAP_SCALE      = 162
 PROP_TAB_TITLE_REASON   = 163
 PROP_RULER_TEXT         = 164
 
+PROP_CORNER_TEXT          = 170
+PROP_CORNER_COLOR_FONT    = 171
+PROP_CORNER_COLOR_BACK    = 172
+PROP_CORNER_COLOR_BORDER  = 173
+PROP_CORNER2_TEXT         = 175
+PROP_CORNER2_COLOR_FONT   = 176
+PROP_CORNER2_COLOR_BACK   = 177
+PROP_CORNER2_COLOR_BORDER = 178
+PROP_BORDER_COLOR         = 180
+PROP_BORDER_COLOR_WIDTH   = 181
+
 SPLITTER_SIDE    = 0
 SPLITTER_BOTTOM  = 1
 SPLITTER_G1      = 5
@@ -707,7 +718,7 @@ GAP_DELETE_ALL  = 4
 GAP_GET_ALL     = 5
 GAP_DELETE_BY_TAG = 6
 
-FOLDING_GET_LIST           = 0
+FOLDING_GET_LIST           = 0 # deprecated in 2023.08
 FOLDING_FOLD               = 1
 FOLDING_UNFOLD             = 2
 FOLDING_ADD                = 3
@@ -720,7 +731,8 @@ FOLDING_UNFOLD_ALL         = 9
 FOLDING_CHECK_RANGE_INSIDE = 10
 FOLDING_CHECK_RANGES_SAME  = 11
 FOLDING_FOLD_LEVEL         = 12
-FOLDING_GET_LIST_FILTERED  = 13
+FOLDING_GET_LIST_FILTERED  = 13 # deprecated in 2023.08
+FOLDING_ENUM               = 14
 
 COMMANDS_USUAL   = 1
 COMMANDS_PLUGINS = 2
@@ -1460,8 +1472,8 @@ class Editor:
     def gap(self, id, num1, num2, tag=-1, size=0, color=COLOR_NONE):
         return ct.ed_gap(self.h, id, num1, num2, tag, size, color)
 
-    def folding(self, id, index=-1, item_x=-1, item_y=-1, item_y2=-1, item_staple=False, item_hint=''):
-        return ct.ed_folding(self.h, id, index, item_x, item_y, item_y2, item_staple, item_hint)
+    def folding(self, id, index=-1, item_x=-1, item_y=-1, item_y2=-1, item_staple=False, item_hint='', item_x2=0, item_tag=0):
+        return ct.ed_folding(self.h, id, index, item_x, item_y, item_x2, item_y2, item_staple, item_hint, item_tag)
 
     def get_wrapinfo(self, param1=-1, param2=-1):
         return ct.ed_get_wrapinfo(self.h, param1, param2)
