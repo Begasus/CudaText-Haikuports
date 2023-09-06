@@ -206,6 +206,7 @@ class Command:
         (_("Delete directory")     , "dir", [NODE_DIR], "cuda_project_man.action_delete_directory"),
         (_("New directory...")     , "dir", [NODE_DIR], "cuda_project_man.action_new_directory"),
         (_("Find in directory...") , "dir", [NODE_DIR], "cuda_project_man.action_find_in_directory"),
+        (_("Copy path relative to project"), "dir", [NODE_DIR], "cuda_project_man.action_copy_relative_path"),
 
         (_("Open in default application")
                                    , "file", [NODE_FILE], "cuda_project_man.action_open_def"),
@@ -213,6 +214,7 @@ class Command:
         (_("Rename...")            , "file", [NODE_FILE], "cuda_project_man.action_rename"),
         (_("Delete file")          , "file", [NODE_FILE], "cuda_project_man.action_delete_file"),
         (_("Set as main file")     , "file", [NODE_FILE], "cuda_project_man.action_set_as_main_file"),
+        (_("Copy path relative to project"), "file", [NODE_FILE], "cuda_project_man.action_copy_relative_path"),
 
         ("-"                       , "", [None, NODE_PROJECT, NODE_DIR, NODE_FILE, NODE_BAD], ""),
         (_("Refresh")              , "", [None, NODE_PROJECT, NODE_DIR, NODE_FILE, NODE_BAD], "cuda_project_man.action_refresh"),
@@ -596,6 +598,15 @@ class Command:
             tree_proc(self.tree, TREE_ITEM_SELECT, h_parent)
             self.action_refresh(h_parent)
         msg_status(_("Deleted file: ") + str(location.name))
+
+    def action_copy_relative_path(self):
+        file_path = str(self.get_location_by_index(self.selected))
+        proj_path = os.path.dirname(self.project_file_path or '')
+        if not proj_path:
+            return
+        if file_path.startswith(proj_path+os.sep):
+            file_path = file_path[len(proj_path)+1:]
+        app_proc(PROC_SET_CLIP, file_path)
 
     def do_delete_dir(self, location):
         for path in location.glob("*"):
@@ -1191,6 +1202,10 @@ class Command:
         self.init_panel()
         self.action_set_as_main_file()
 
+    def contextmenu_copy_relative_path(self):
+        self.init_panel()
+        self.action_copy_relative_path()
+
     def enum_all(self, callback):
         """
         Enum for all items.
@@ -1522,6 +1537,17 @@ class Command:
 
         fn = ed.get_filename()
         self.add_node(fn)
+
+    def add_current_dir(self):
+
+        if not self.tree:
+            self.init_panel(False)
+
+        fn = ed.get_filename()
+        if fn:
+            d = os.path.dirname(fn)
+            if not (IS_WIN and d.endswith(':\\')):
+                self.add_node(d)
 
     def add_opened_files(self):
 
