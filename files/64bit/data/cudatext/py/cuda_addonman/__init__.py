@@ -377,14 +377,15 @@ class Command:
 
     def do_remove(self):
 
-        items = get_installed_addons({
+        ignored = {
             'plugins': STD_MODULES,
             'lexers': STD_LEXERS,
             'lexers_lite': STD_LEXERS_LITE,
             'themes': STD_THEMES,
             'lang': STD_TRANSLATIONS,
             'snippets': STD_SNIPPETS,
-            })
+            }
+        items = get_installed_addons(ignored)
         desc = [i['kind']+': '+i['name'] for i in items]
 
         res = dlg_menu(DMENU_LIST, desc, caption=_('Remove add-on'))
@@ -397,6 +398,8 @@ class Command:
         module = item.get('module', '')
         if module:
             do_remove_version_of_plugin(module)
+        elif item['kind'] == 'lexer':
+            do_remove_version_of_lexer(item['name'])
 
         ok = True
         for fn in item['files']:
