@@ -227,6 +227,7 @@ cCommand_FoldingFoldAtCurLine = 1040
 cCommand_FoldingUnfoldAtCurLine = 1041
 cCommand_FoldingToggleAtCurLine = 1042
 cCommand_FoldingFoldSelection = 1043
+cCommand_FoldingSelectRangeAtCaret = 1045
 
 cCommand_CancelKeepSel = 1998
 cCommand_CancelKeepLast = 1999
@@ -506,8 +507,11 @@ cmd_BracketJump                = 2845
 cmd_BracketSelect              = 2846
 cmd_BracketSelectInside        = 2847
 
+cmd_TabSize_Set1               = 2861
 cmd_TabSize_Set2               = 2862
+cmd_TabSize_Set3               = 2863
 cmd_TabSize_Set4               = 2864
+cmd_TabSize_Set6               = 2866
 cmd_TabSize_Set8               = 2868
 
 cmd_GroupActivate1             = 2901
@@ -516,9 +520,9 @@ cmd_GroupActivate3             = 2903
 cmd_GroupActivate4             = 2904
 cmd_GroupActivate5             = 2905
 cmd_GroupActivate6             = 2906
-#cmd_GroupActivateFloat1        = 2910
-#cmd_GroupActivateFloat2        = 2911
-#cmd_GroupActivateFloat3        = 2912
+cmd_GroupActivateFloat1        = 2910
+cmd_GroupActivateFloat2        = 2911
+cmd_GroupActivateFloat3        = 2912
 
 #encoding without reload
 cmd_Encoding_utf8bom_NoReload     = 3000

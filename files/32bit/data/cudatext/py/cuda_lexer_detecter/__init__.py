@@ -13,6 +13,15 @@ def log(*args):
     pass
     #print(*args)
 
+def get_zip_filenames(filename):
+    from zipfile import ZipFile
+    res = []
+    with ZipFile(filename, 'r') as z:
+        res = z.namelist()
+    res.remove('install.inf')
+    return res
+
+
 class Command:
 
     def on_open_none(self, ed_self):
@@ -92,12 +101,15 @@ class Command:
         lex = lexers[res]
         log('Detected lexer:', lex)
 
-        # imports here to speedup plugin load when no lexers found
+        # imports are here to speedup plugin load when no lexers found
+        import json
         import tempfile
         from urllib.parse import quote
+        from cuda_addonman import opt
         from cuda_addonman.work_remote import get_url
 
-        url = 'https://sourceforge.net/projects/cudatext/files/addons/lexers/lexer.' + quote(lex.replace(' ', '_')) + '.zip'
+        url_filename = 'lexer.' + quote(lex.replace(' ', '_')) + '.zip'
+        url = 'https://sourceforge.net/projects/cudatext/files/addons/lexers/' + url_filename
 
         tempname = tempfile.gettempdir()+os.sep+'cudatext_lexer.zip'
         get_url(url, tempname, True)
@@ -109,3 +121,23 @@ class Command:
         lexer_proc(LEXER_REREAD_LIB, '')
 
         ed_self.set_prop(PROP_LEXER_FILE, lex)
+
+        def get_lexer_version(section):
+            urls = [url for url in opt.ch_def if url.endswith('/lexers.json')]
+            if not urls:
+                return ''
+            lexers_url = urls[0]
+            lexers_json = tempfile.gettempdir() + os.sep + 'cudatext_lexers.json'
+            get_url(lexers_url, lexers_json, True)
+            lexers_json_data = json.loads(open(lexers_json).read())
+            for i_ in lexers_json_data:
+                for k_, v_ in i_.items():
+                    if k_ == 'url' and section in v_:
+                        return i_['v']
+
+        fn_pkg = os.path.join(app_path(APP_DIR_SETTINGS), 'packages.ini')
+        version = get_lexer_version(url_filename)
+        ini_write(fn_pkg, url_filename, 'd', 'data/lexlib')
+        ini_write(fn_pkg, url_filename, 'f', ';'.join(get_zip_filenames(tempname)))
+        ini_write(fn_pkg, url_filename, 'v', version)
+        print(_('Installed lexer "%s", version "%s"')%(lex, version))

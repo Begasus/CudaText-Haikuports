@@ -297,10 +297,6 @@
   //See description in the Wiki topic "Dynamic highlight".
   "dynamic_highlight": 4000,
 
-  //On app start, postpone lexer parsing, until file tab becomes visible (ie don't parse hidden tabs).
-  //This makes much faster app start, if session loads lot of files.
-  "lexer_postpone_until_shown": true,
-
   //When number of lines in document is bigger than the option value, lexer parser
   //will not find folding ranges. It means, for such big files:
   //1) Lexer parsing runs 1.5-3 times faster.
@@ -325,6 +321,14 @@
   //range height (in lines) is less/equal than the option value.
   //Value=0: show for all ranges.
   "fold_icon_min_range": 0,
+
+  //How to render folded block underline from option "fold_style":4.
+  //  0: From left edge to window right edge
+  //  1: From left edge to line end
+  //  2: From line indentation to line end
+  //  3: From left edge to "margin" column
+  //Note: this option is global, not per-lexer.
+  "fold_underline_size": 0,
 
   //[Text/Commands]
   //If no selection, "Copy to clipboard" will take entire line with caret.
@@ -892,8 +896,11 @@
   //  3: right
   "ui_tab_position": 0,
 
-  //UI tabs: indent between tab edge and text beginning.
+  //UI tabs: indent between left tab edge and text beginning.
   "ui_tab_padding": 6,
+
+  //UI tabs: indent between right tab edge and text ending.
+  "ui_tab_padding2": 6,
 
   //UI tabs: When to show "x" buttons on tabs.
   //  0: don't show
@@ -1059,8 +1066,11 @@
 
   //Maximal time, in milliseconds, of the code-tree filling procedure.
   //No tree nodes are added after that limit, instead only dummy node
-  //is added: ">1000ms, skipped 1000/2000".
-  "ui_tree_fill_max_time": 1000,
+  //is added: ">200ms, skipped 1500/2000".
+  "ui_tree_fill_max_time": 150,
+
+  //Fully unfold code-tree after filling.
+  "ui_tree_unfold": false,
 
   //[Text/NewDocument]
   //New tabs: Lexer name.
@@ -1224,6 +1234,7 @@
   "key_left_right_swap_sel": true,
 
   //Keys Left/Right-arrows: try to jump to opposite selection edge, and keep this selection.
+  //It works only for single caret.
   "key_left_right_swap_sel_and_select": false,
 
   //[UI/Statusbar]
@@ -1331,6 +1342,15 @@
   //If value N>0, app creates N backups of session files on closing: 'history session.X.cuda-session'.
   //You can open these backups by plugin Session Manager, or rename them to a normal name.
   "ui_backup_sessions": 2,
+
+  //Maximal size of document body (in chars) which can be saved to session.
+  //Note: this option is global, not per-lexer.
+  "ui_session_max_text": 50000000,
+
+  //Maximal size of Undo-data which can be saved to session.
+  //If size of Undo is bigger, Undo won't be saved to session, but Undo still works in editor.
+  //Note: this option is global, not per-lexer.
+  "ui_session_max_undo": 1000000,
 
   //[Lexers]
   //Allow to apply color-theme to lexer's styles.
@@ -1462,6 +1482,10 @@
   //Option is (mostly) for lexer-specific configs.
   "autocomplete_commit_chars": ",;",
 
+  //Allow Enter-key to commit the auto-completion result.
+  //Tab-key always commits the result.
+  "autocomplete_commit_on_enter": true,
+
   //When any of these chars is typed while showing completion listbox,
   //listbox is closed, and typed char is appended.
   "autocomplete_close_chars": "<>()[]{}=",
@@ -1493,7 +1517,8 @@
   "auto_close_brackets": "([{",
 
   //[Text/Folding]
-  //If value>1, option allows N consecutive commented lines to automatically create the folding range.
+  //If value>1, option allows N consecutive 'comment'/'string' lines to automatically create
+  //the folding range.
   //Note: this option is global, not per-lexer.
   "auto_fold_comments": 0,
 
@@ -1505,11 +1530,11 @@
   "picture_types": "bmp,png,jpg,jpeg,jpe,gif,ico,webp,psd,tga,cur",
 
   //[View/Web]
-  //Highlight+underline links (URL and emails).
+  //Highlight+underline hyperlinks (URL and emails).
   "links_hilite": true,
 
-  //Regular expression, which finds links.
-  "links_regex": "\\b(mailto:)?\\w[\\w\\-\\.]*@\\w[\\w\\-\\.]*\\.\\w{2,}\\b|\\b(https?://|ftp://|magnet:\\?|www\\.|ftp\\.)\\w[\\w\\-\\.@]*(:\\d+)?(/[~\\w\\.,\\-\\+\\/%]*)?(\\?[^<>'\"\\s]+)?(\\#[\\w\\-]*)?",
+  //Regular expression, which finds hyperlinks.
+  "links_regex": "\\b(mailto:)?\\w[\\w\\-\\+\\.]*@\\w[\\w\\-\\.]*\\.\\w{2,}\\b|\\b(https?://|ftp://)\\w[\\w\\-\\.@]*(:\\d+)?(/([~\\w\\.\\-\\+\\/%@!%]|\\(.*?\\))*)?(\\?[^<>'\"\\s]+)?(\\#[\\w\\-\\./%:!]*)?",
 
   //[File]
   //Maximal file size, allowed to open, in Mb.
@@ -1615,6 +1640,7 @@
   "find_hotkey_op_tokens": "",
   "find_hotkey_op_hi": "",
   "find_hotkey_op_prescase": "",
+  "find_hotkey_more": "Ctrl+Alt+D",
 
   //[Viewer]
   //Viewer text width in 'binary' mode.
@@ -1627,11 +1653,15 @@
   //Show in console lines "Init: cuda_nnnn" about plugins initialization.
   "py_init_log": true,
 
-  //Write console contents to file settings/console.log.
+  //Write console contents to file "settings/console.log".
   "log_console": false,
 
   //Show in console lines "Loaded session...", "Saved session...".
   "log_sessions": true,
+
+  //Show red indicators 'rendering time' and 'count of rendered frames' in the
+  //screen corner. Useful for CudaText developers only.
+  "log_timing" : false,
 
   //[Emmet]
   //Add slash to empty tags.
