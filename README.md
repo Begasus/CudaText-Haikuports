@@ -15,7 +15,6 @@ CudaText already sets the `config` folder in the right place on Haiku, that is, 
 
 CudaText searches for it's data in `/boot/home/config/non-packaged/data/cudatext`.
 
-
 ![CudaText Package](/CudaText_hpkg.png)
 
 ![CudaText Software](/CudaText.png)

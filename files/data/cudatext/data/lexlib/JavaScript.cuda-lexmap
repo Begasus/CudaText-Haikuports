@@ -1,0 +1,30 @@
+[comments]
+str1=/*
+str2=*/
+styles_cmt=Comment,Comment doc
+styles_str=String
+
+[ref]
+0=PHP_
+1=JSDoc
+2=HTML
+3=JSON
+4=CSS
+
+[map]
+Symbol=Symbol
+Number=Number
+String=String
+String regex=String2
+Id=Id
+Id keyword=IdKeyword
+Id standard=Id1
+Id std=Id2
+Comment=Comment
+Comment doc=CommentDoc
+PHP tag=TagInclude
+Id func name=Label
+HTML tag name=TagId
+Id upcase const=Id4
+Id modifier=Id3
+Sublexer BG=IncludeBG2
