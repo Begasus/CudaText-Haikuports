@@ -129,7 +129,6 @@
   //                   On macOS, 'offsets' decrease (2x) rendering speed.
   //                   On GTK2 and Qt5, 'offsets' decrease rendering speed.
   //  if 'c' in value: On painting caret, additionally render the text over inverted caret's cell.
-  //  if 'e' in value: Ellipsis-char U+2026 has width 100%, otherwise the width from "unicode_full_width".
   //  if 's' in value: Show Unicode-spaces as usual spaces.
   //                   If 's' not in value, show Unicode-spaces in hex form.
   //                   Unicode-spaces are: U+1680, U+2007, U+200B, U+202F, U+205F, U+2060, U+3000.
@@ -246,6 +245,16 @@
   "ui_save_always": true,
 
   //[Text/Look]
+  //Additional vertical spacing per each line, in pixels. [has suffix]
+  //Can be negative too.
+  "line_space_top": 0,
+  "line_space_top__linux": 0,
+  "line_space_top__mac": 0,
+
+  "line_space_bottom": 1,
+  "line_space_bottom__linux": 1,
+  "line_space_bottom__mac": 1,
+
   //Keep original font colors of text in selected block.
   "keep_sel_font_color": false,
 
@@ -360,10 +369,12 @@
   //Option is string of few chars.
   //  if 'c' in value: Copy to usual clipboard (the only possibility on Windows).
   //  if 'p' in value: Copy to Unix 'primary selection'.
-  //  if 'm' with a following number in value: Limit the selection length, in bytes (suffix "k" is not supported here). Default is 500000.
-  //Example value: "pm10000".
   //Note: this option is global, not per-lexer.
   "auto_copy_clp": "",
+
+  //Auto-copying of selected text to clipboard: maximal supported selection length, in bytes.
+  //Note: this option is global, not per-lexer.
+  "auto_copy_max_size": 500000,
 
   //[File/Saving]
   //On saving file: delete spaces at lines ends.
@@ -379,14 +390,7 @@
   //String of non-word characters, which define word boundaries.
   //To specify underscore "_" here, place it as first char.
   //Option should be used in lexer-specific config.
-  "nonword_chars": "-+*=/\\()[]{}<>\"'.,:;~?!@#$%^&|`…",
-
-  //[Text/Look]
-  //Additional vertical spacing per each line, in pixels. [has suffix]
-  //Can be negative too.
-  "spacing_y": 1,
-  "spacing_y__linux": 1,
-  "spacing_y__mac": 1,
+  "nonword_chars": "-+*=/\\()[]{}<>\"'.,:;~?!@#$%^&|`…«»",
 
   //[Text/Tabulations]
   //Tab-char width.
@@ -409,7 +413,7 @@
   //[Text]
   //Maximal line length, for which Undo is still working.
   //Note: this option is global, not per-lexer.
-  "max_line_len_for_undo": 102400,
+  "max_line_len_for_undo": 10000000,
 
   //Maximal line length, when editing of a line will not reset current lexer to 'none'
   //for a few seconds. For example, for CPU Intel Core i3, good value is 1900
@@ -445,6 +449,7 @@
   "gutter_fold_icons": 0,
 
   //Gutter: Size of plus/minus/triangle folding icons.
+  //Note: if you set big value and icon does not fit, adjust the option "gutter_width_folding".
   "gutter_icon_size": 4,
 
   //Gutter: Width (in pixels) of "folding" column. If 0, column is hidden.
@@ -1026,7 +1031,7 @@
   //If big value: all items of "Paste from history" may not fit to screen.
   "ui_max_history_clipboard": 15,
 
-  //History: Which elements to save to history/session files.
+  //History: Which elements to save to history/session/bookmarks files.
   //Option affects only saving the history, and is ignored on reading it.
   //Value is string, each char _disables_ storing of one element.
   //  if 't' in value: Text of document (it's saved for modified documents)
@@ -1364,7 +1369,8 @@
   //    A: auto-sized (width adjusts to text)
   "ui_statusbar_panels": "caret,C,180|enc,C,125|ends,A,|lexer,C,140|tabsize,A,|selmode,A,|msg,L,",
 
-  //Statusbar messages: show time in seconds.
+  //Statusbar message is shown for the specified time, in seconds.
+  //After that, message becomes grayed.
   "ui_statusbar_time": 5,
 
   //Max count of lines in the tooltip of last statusbar cell.
@@ -1394,7 +1400,7 @@
   //Option value=0: don't save session by timer.
   //Note: this timer is active only in the "idle state" of the editor, when you pause
   //the text editing for 1-2 seconds.
-  "ui_session_save_interval": 30,
+  "ui_session_save_interval": 40,
 
   //Allow to close program without confirmation, with saving modified documents
   //to the session. In details: if a) "ui_auto_save_session":true,
@@ -1403,9 +1409,9 @@
   //program will save modified documents to the session, on closing, without confirmation.
   "ui_auto_save_session": true,
 
-  //If value N>0, app creates N backups of session files on closing: 'history session.X.cuda-session'.
-  //You can open these backups by plugin Session Manager, or rename them to a normal name.
-  "ui_backup_sessions": 2,
+  //If value N>0, app creates N backups of session files: "filename.X.cuda-session".
+  //You can open them by plugin Session Manager, or copy them to "default.cuda-session".
+  "ui_backup_sessions": 4,
 
   //Maximal size of document body (in chars) which can be saved to session.
   //Note: this option is global, not per-lexer.
@@ -1516,7 +1522,9 @@
   "duplicate_move_down": true,
 
   //[Text/Completion]
-  //Enable auto-completion from *.acp files (static lists of words).
+  //Enable auto-completion from data/autocomplete/*.acp files (static lists of words).
+  //These *.acp files exist only for small amount of lexers.
+  //This feature is outdated, better use "LSP Client" plugin.
   "autocomplete_acp": true,
 
   //Enable special HTML auto-completion, see wiki.
@@ -1582,6 +1590,13 @@
   //If false, auto-completion will not replace nearest word-chars on the right of the caret.
   "autocomplete_replace_on_right": true,
 
+  //Non-word chars before caret, which are allowed for completion-listbox to show again.
+  //Option has effect not on the initial listbox showing, but when user moves caret /
+  //deletes chars with listbox visible. In this case, listbox can re-show or hide.
+  //Option should have at least these chars: .:> because of C++ operators :: and -> .
+  //Quote-chars are not required, but good to have for Codeium plugin.
+  "autocomplete_symbol_chars_allowed": ".:>'\"",
+
   //Auto-pair some chars on typing.
   //Value must have some of supported chars without spaces:
   //  ( [ { < ' " ` ~ * #
@@ -1603,7 +1618,7 @@
 
   //Regular expression, which finds hyperlinks.
   //Default value finds http://, https://, ftp:// links and e-mails (with optional 'mailto:').
-  "links_regex": "\\b(mailto:)?\\w[\\w\\-\\+\\.]*@\\w[\\w\\-\\.]*\\.\\w{2,}\\b|\\b(https?://|ftp://)\\w[\\w\\-\\.@]*(:\\d+)?(/([~\\w\\.\\-\\+/%@!%:&\\*=\\|,;\\$]|\\(.*?\\)|\\[.*?\\]|\\{.*?\\})*)?(\\?[^\\s\"'<>]*[\\w/\\-\\+\\*=])?(\\#[\\w\\-\\./%:!]*)?",
+  "links_regex": "\\b(mailto:)?\\w[\\w\\-\\+\\.]*@\\w[\\w\\-\\.]*\\.\\w{2,}\\b|\\b(https?://|ftp://)\\w[\\w\\-\\.@]*(:\\d+)?(/([~\\w\\.\\-\\+/%@!%:&\\*=\\|,;\\$\\[\\]]|\\(.*?\\)|\\{.*?\\})*)?(\\?[^\\s\"'<>]*[\\w/\\-\\+\\*=])?(\\#[\\w\\-\\./%:!]*)?",
 
   //[File]
   //Maximal file size, allowed to open, in Mb.

@@ -12,7 +12,11 @@ from cudax_lib import get_translation
 _   = get_translation(__file__)  # i18n
 
 def get_url(url, fn, del_first=False):
-
+    '''
+    Returns True if downloaded OK.
+    Returns False if cannot download and Abort pressed.
+    Returns None if cannot download and Ignore pressed.
+    '''
     if opt.sf_mirror:
         if url.startswith('https://sourceforge.net/projects/'):
             url += '/download?use_mirror='+opt.sf_mirror
@@ -34,7 +38,7 @@ def get_url(url, fn, del_first=False):
 
     while True:
         try:
-            r = requests.get(url, proxies=proxies, verify=opt.verify_https, stream=True)
+            r = requests.get(url, proxies=proxies, verify=opt.verify_https, stream=True, timeout=opt.download_timeout)
             with open(fn_temp, 'wb') as f:
                 for chunk in r.iter_content(chunk_size=1024):
                     if chunk: # filter out keep-alive new chunks
@@ -42,10 +46,12 @@ def get_url(url, fn, del_first=False):
                         #f.flush() commented by recommendation
 
             if os.path.isfile(fn_temp):
+                if os.path.getsize(fn_temp)==0:
+                    raise Exception('Server returned zero-sized file')
                 if os.path.isfile(fn):
                     os.remove(fn)
                 os.rename(fn_temp, fn)
-            return
+            return True
 
         except Exception as e:
             res = app.msg_box(_('Cannot download:\n{}\n{}\n\nRetry?').format(url, str(e)),
@@ -64,13 +70,20 @@ def is_file_html(fn):
 
 
 def get_plugin_zip(url):
+    '''
+    Returns .zip filename if downloaded ok.
+    Returns False if cannot download and Abort pressed.
+    Returns None if cannot download and Ignore pressed.
+    '''
     if not url: return
     fn = os.path.join(get_temp_dir(), 'addon.zip')
-    get_url(url, fn, True)
-    
+    res = get_url(url, fn, True)
+    if not res:
+        return res
+
     if is_file_html(fn):
         os.remove(fn)
-    
+
     if os.path.isfile(fn):
         return fn
 
@@ -84,6 +97,11 @@ def file_aged(fn):
 
 
 def get_channel(url):
+    '''
+    Returns list, if channel downloaded OK.
+    Returns False, if cannot download and Abort pressed.
+    Returns None, if cannot download and Ignore pressed.
+    '''
     cap = url.split('/')[-1]
 
     #separate temp fn for each channel
@@ -95,13 +113,17 @@ def get_channel(url):
     #download if not cached or cache is aged
     if file_aged(temp_fn):
         print(_('  getting:'), cap)
-        get_url(url, temp_fn, True)
+        res = get_url(url, temp_fn, True)
+        if not res: # False or None
+            return res
     else:
         print(_('  cached:'), cap)
-    if not os.path.isfile(temp_fn): return
+
+    if not os.path.isfile(temp_fn):
+        return
 
     text = open(temp_fn, encoding='utf8').read()
-    
+
     try:
         d = json.loads(text)
     except Exception as e:
@@ -122,8 +144,12 @@ def get_remote_addons_list(channels):
     print(_('Read channels:'))
     for ch in channels:
         items = get_channel(ch)
-        if items:
+        if isinstance(items, list):
             res += items
+        elif items is None:
+            # 'Ignore' pressed
+            continue
         else:
+            # 'Abort' pressed
             return
     return res

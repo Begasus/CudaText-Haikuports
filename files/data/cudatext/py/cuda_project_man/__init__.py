@@ -36,6 +36,8 @@ PROJECT_DIALOG_FILTER = _("CudaText projects") + "|*" + PROJECT_EXTENSION
 PROJECT_UNSAVED_NAME = _("(Unsaved project)")
 PROJECT_TEMP_FILENAME = os.path.join(app_path(APP_DIR_SETTINGS), 'temporary'+PROJECT_EXTENSION)
 NODE_PROJECT, NODE_DIR, NODE_FILE, NODE_BAD = range(4)
+OS_SUFFIX = app_proc(PROC_GET_OS_SUFFIX, '')
+DEF_SES = 'default'+OS_SUFFIX+'.cuda-session'
 global_project_info = {}
 sort_order = 'ext'
 
@@ -239,6 +241,8 @@ class Command:
         (_("Copy path"), "dir", [NODE_DIR], "cuda_project_man.action_copy_path", ""),
         (_("Copy relative path") , "dir", [NODE_DIR], "cuda_project_man.action_copy_relative_path", ""),
         (_("-"), "dir", [NODE_DIR], "", ""),
+        (_("Duplicate..."), "dir", [NODE_DIR], "cuda_project_man.action_duplicate", ""),
+        (_("-"), "dir", [NODE_DIR], "", ""),
         (_("Focus in file manager"), "dir", [NODE_DIR], "cuda_project_man.action_focus_in_fileman", ""),
         (_("-"), "dir", [NODE_DIR], "", ""),
         (_("Properties..."), "dir", [NODE_DIR], "cuda_project_man.action_get_properties", ""),
@@ -255,7 +259,7 @@ class Command:
         (_("Rename..."), "file", [NODE_FILE], "cuda_project_man.action_rename", "F2"),
         (_("Delete"), "file", [NODE_FILE], "cuda_project_man.action_delete_file", "Del"),
         (_("-"), "file", [NODE_FILE], "", ""),
-        (_("Backup..."), "file", [NODE_FILE], "cuda_project_man.action_backup", ""),
+        (_("Duplicate..."), "file", [NODE_FILE], "cuda_project_man.action_duplicate", ""),
         (_("-"), "file", [NODE_FILE], "", ""),
         (_("Set as main file"), "file", [NODE_FILE], "cuda_project_man.action_set_as_main_file", ""),
         (_("-"), "file", [NODE_FILE], "", ""),
@@ -348,7 +352,8 @@ class Command:
         _toolbar_add_btn(self.h_bar, hint=_('Project sessions'), icon=icon_cfg, command='cuda_project_man.menu_cfg')
         _toolbar_add_btn(self.h_bar, hint=_('Sync project-tree with current editor file'), icon=icon_sync, command='cuda_project_man.sync_to_ed' )
 
-        self.h_btn_sync = toolbar_proc(self.h_bar, TOOLBAR_GET_BUTTON_HANDLE, index=0)
+        btn_count = toolbar_proc(self.h_bar, TOOLBAR_GET_COUNT)
+        self.h_btn_sync = toolbar_proc(self.h_bar, TOOLBAR_GET_BUTTON_HANDLE, index=btn_count-1)
         button_proc(self.h_btn_sync, BTN_SET_VISIBLE, not self.options.get('always_sync', False))
 
         toolbar_proc(self.h_bar, TOOLBAR_SET_WRAP, index=True)
@@ -588,7 +593,7 @@ class Command:
         sfn = str(fn)
         if not os.path.isfile(sfn):
             return
-        suffix = app_proc(PROC_GET_OS_SUFFIX, '')
+        suffix = OS_SUFFIX
         if suffix=='':
             #Windows
             #os.startfile(sfn) crashes with LSP plugin
@@ -609,7 +614,7 @@ class Command:
         sfn = str(fn)
         #if not os.path.isfile(sfn):
             #return
-        suffix = app_proc(PROC_GET_OS_SUFFIX, '')
+        suffix = OS_SUFFIX
 
         if suffix=='':
             #Windows
@@ -666,7 +671,7 @@ class Command:
         self.jump_to_filename(str(new_location))
         msg_status(_("Renamed to: ") + str(collapse_filename(str(new_location.name))))
 
-    def action_backup(self):
+    def action_duplicate(self):
         location = Path(self.get_location_by_index(self.selected))
         e = _file_editor(str(location))
 
@@ -674,8 +679,8 @@ class Command:
         from datetime import datetime
         fn_1 = location.name if not fn_parts[0] else fn_parts[0]
         fn_2 = '' if not fn_parts[0] else ('.' + '.'.join(fn_parts[i+1] for i in range(len(fn_parts) - 1)))
-        backup_name = fn_1 + '_' + datetime.now().strftime("%y%m%d_%H%M%S") + fn_2
-        result = dlg_input(_("Backup to:"), str(backup_name))
+        backup_name = fn_1 + '_' + datetime.now().strftime("%y%m%d_%H%M%S") + fn_2 if not os.path.isdir(str(location)) else location.name+' copy'
+        result = dlg_input(_("Duplicate to:"), str(backup_name))
         if not result:
             return
 
@@ -687,7 +692,10 @@ class Command:
             e.save(str(new_location), True)
         else:
             import shutil
-            shutil.copy2(location, new_location)
+            if os.path.isdir(location):
+                shutil.copytree(location, new_location, symlinks=False)
+            else:
+                shutil.copy2(location, new_location)
 
         if self.is_path_in_root(location):
             self.add_node(str(new_location))
@@ -1268,7 +1276,7 @@ class Command:
 
         id = menu_proc(self.h_menu_cfg, MENU_ADD, command='cuda_project_man.session_forget_ex', caption=_('Forget session, close all tabs'))
         sess = app_path(APP_FILE_SESSION)
-        if os.path.basename(sess)=='history session.json':
+        if os.path.basename(sess)==DEF_SES:
             menu_proc(id, MENU_SET_ENABLED, command=False)
 
         #menu_proc(self.h_menu_cfg, MENU_ADD, caption='-')
@@ -2077,7 +2085,7 @@ class Command:
 
             # 3. and forget current session if name is the same
             if name == self.session_cur_name():
-                app_proc(PROC_SET_SESSION, 'history session.json')
+                app_proc(PROC_SET_SESSION, DEF_SES)
 
     def session_delete_all(self):
 
@@ -2156,7 +2164,7 @@ class Command:
             if msg_box(_('Save current state to the session "%s"?')%sess, MB_OKCANCEL+MB_ICONQUESTION)==ID_OK:
                 app_proc(PROC_SAVE_SESSION, sess)
 
-        app_proc(PROC_SET_SESSION, 'history session.json')
+        app_proc(PROC_SET_SESSION, DEF_SES)
 
         fn += '|/sessions/'+name
         app_proc(PROC_LOAD_SESSION, fn)
@@ -2242,7 +2250,7 @@ class Command:
 
     def session_forget(self):
 
-        app_proc(PROC_SET_SESSION, 'history session.json')
+        app_proc(PROC_SET_SESSION, DEF_SES)
 
     def session_forget_ex(self):
 
@@ -2268,7 +2276,7 @@ class Command:
             sess = cur_fn+'|/sessions/'+cur_sess
             app_proc(PROC_SAVE_SESSION, sess)
             if and_forget:
-                app_proc(PROC_SET_SESSION, 'history session.json')
+                app_proc(PROC_SET_SESSION, DEF_SES)
 
     def is_path_in_root(self, path):
 
