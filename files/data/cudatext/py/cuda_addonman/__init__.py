@@ -11,15 +11,8 @@ from .work_remote import *
 from .work_dlg_config import *
 from .work_github import *
 from .work_install_helper import after_install
-from . import opt
-
-'''
-if os.name=='nt':
-    from .work_cudatext_updates__fosshub import check_cudatext
-else:
-    from .work_cudatext_updates__sourceforge import check_cudatext
-'''
 from .work_cudatext_updates__sourceforge import check_cudatext
+from . import opt
 
 from cudax_lib import get_translation, safe_open_url
 _   = get_translation(__file__)  # i18n
@@ -51,11 +44,8 @@ STD_MODULES = (
   'cuda_lexer_detecter',
   )
 STD_LEXERS = (
-  'Assembly',
   'Bash script',
   'Batch files',
-  'C',
-  'C++',
   'CSS',
   'HTML',
   'HTML style',
@@ -100,7 +90,6 @@ STD_CODETREEICONS = (
   'default_16x16',
 )
 STD_TRANSLATIONS = (
-  'ru_RU',
   'translation template',
 )
 STD_SNIPPETS = (
@@ -317,7 +306,8 @@ class Command:
                 return
 
             for item in req_items:
-                self.do_install_single(item, True, False)
+                if not self.do_install_single(item, True, False):
+                    return
 
         self.do_install_single(info,
             not opt.install_confirm,
@@ -325,6 +315,10 @@ class Command:
 
 
     def do_install_single(self, info, is_silent, suggest_readme):
+        '''
+        Returns True if downloaded and installed.
+        Returns None if cannot download nor install.
+        '''
 
         name = info['name']
         url = info['url']
@@ -333,7 +327,7 @@ class Command:
 
         #download
         fn = get_plugin_zip(url)
-        if fn is None or not os.path.isfile(fn):
+        if fn is None or fn==False or not os.path.isfile(fn):
             msg_status(_('Cannot download file'))
             return
 
@@ -368,6 +362,8 @@ class Command:
                     res = dlg_menu(DMENU_LIST, [s[0] for s in names], caption=_('Readme'))
                     if res is None: return
                     file_open(names[res][1])
+
+        return True
 
 
     def do_install_lexer(self):
@@ -612,9 +608,12 @@ class Command:
         print(_('Updating addons:'))
         fail_count = 0
 
-        for a in addons:
+        for (a_index, a) in enumerate(addons):
             print('  [%s] %s' % (a['kind'], a['name']))
-            msg_status(_('Updating: [{}] {}').format(a['kind'], a['name']), True)
+            msg_status(
+                '({}/{}) '.format(a_index+1, len(addons))+
+                _('Updating: [{}] {}').format(a['kind'], a['name']),
+                True)
 
             dir_to_remove = ''
             m = a.get('module', '')
@@ -622,7 +621,10 @@ class Command:
                 # special update for Git repos
                 m_dir = os.path.join(DIR_PY, m)
                 if os.path.isdir(os.path.join(m_dir, '.git')):
-                    msg_status(_('Running "git pull" in "%s"')%m_dir, True)
+                    msg_status(
+                        '({}/{}) '.format(a_index+1, len(addons))+
+                        _('Running "git pull" in "%s"')%m_dir,
+                        True)
                     try:
                         subprocess.call(['git', 'stash', 'save'], cwd=m_dir)
                         subprocess.call(['git', 'pull'], cwd=m_dir)

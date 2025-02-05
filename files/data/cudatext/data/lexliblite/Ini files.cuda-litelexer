@@ -14,11 +14,11 @@
       "style": "Comment"
     },
     "section": {
-      "regex": "^\\[.+?\\]",
+      "regex": "^\\[.+?\\]\\x20*",
       "style": "Label"
     },
     "key": {
-      "regex": "^.+?(?=\\=)",
+      "regex": "^.+?(?==)",
       "style": "Id1"
     },
     "eq": {
@@ -28,10 +28,6 @@
     "const": {
       "regex": "\\b(true|false)\\b",
       "style": "Id2"
-    },
-    "num": {
-      "regex": "\\d+\\b",
-      "style": "Number"
     },
     "val": {
       "regex": "\\w+",

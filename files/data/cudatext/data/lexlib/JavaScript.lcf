@@ -1,4 +1,4 @@
-object SyntAnal9: TLibSyntAnalyzer
+object SyntAnal10: TLibSyntAnalyzer
   Formats = <
     item
       DisplayName = 'Symbol'
@@ -196,17 +196,15 @@ object SyntAnal9: TLibSyntAnalyzer
       StyleName = 'String regex'
       TokenType = 4
       Expression = 
-        '(?-i)(?<=[=\(\[&!:/>\?\+,\}`\|]\x20*) / (\\/|\\\\|\[.+?\]|.)*? /' +
-        '[gimysu]* |'#13#10'(?-i)(?<=^\x20*)                / (\\/|\\\\|\[.+?\]' +
-        '|.)*? /[gimysu]* |'#13#10'(?-i)(?<=\bcase\x20*)           / (\\/|\\\\|' +
-        '\[.+?\]|.)*? /[gimysu]* |'#13#10'(?-i)(?<=\breturn\x20*)         / (\\' +
-        '/|\\\\|\[.+?\]|.)*? /[gimysu]* |'#13#10'(?-i)(?<=\bawait\x20*)        ' +
-        '  / (\\/|\\\\|\[.+?\]|.)*? /[gimysu]* |'#13#10'(?-i)(?<=\binstanceof\x' +
-        '20*)     / (\\/|\\\\|\[.+?\]|.)*? /[gimysu]* |'#13#10'(?-i)(?<=\bgoto\' +
-        'x20*)           / (\\/|\\\\|\[.+?\]|.)*? /[gimysu]* |'#13#10'(?-i)(?<=' +
-        '\bin\x20*)             / (\\/|\\\\|\[.+?\]|.)*? /[gimysu]* |'#13#10'(?' +
-        '-i)(?<=\bof\x20*)             / (\\/|\\\\|\[.+?\]|.)*? /[gimysu]' +
-        '*'#13#10
+        '(?-i)(?<=[=\(\[&!:;/>\?\+,`\|]\x20*)'#13#10'                          ' +
+        ' /(\\.|\[.+?\]|.)*?/[gimysu]*|'#13#10'(?-i)(?<=^\x20*)           /(\\.' +
+        '|\[.+?\]|.)*?/[gimysu]*|'#13#10'(?-i)(?<=\bcase\x20*)      /(\\.|\[.+?' +
+        '\]|.)*?/[gimysu]*|'#13#10'(?-i)(?<=\breturn\x20*)    /(\\.|\[.+?\]|.)*' +
+        '?/[gimysu]*|'#13#10'(?-i)(?<=\bawait\x20*)     /(\\.|\[.+?\]|.)*?/[gim' +
+        'ysu]*|'#13#10'(?-i)(?<=\binstanceof\x20*)/(\\.|\[.+?\]|.)*?/[gimysu]*|' +
+        #13#10'(?-i)(?<=\bgoto\x20*)      /(\\.|\[.+?\]|.)*?/[gimysu]*|'#13#10'(?-i' +
+        ')(?<=\bin\x20*)        /(\\.|\[.+?\]|.)*?/[gimysu]*|'#13#10'(?-i)(?<=\' +
+        'bof\x20*)        /(\\.|\[.+?\]|.)*?/[gimysu]*'#13#10
       ColumnFrom = 0
       ColumnTo = 0
     end
@@ -220,6 +218,7 @@ object SyntAnal9: TLibSyntAnalyzer
     end
     item
       DisplayName = 'Id func name'
+      Enabled = False
       StyleName = 'Id func name'
       TokenType = 2
       Expression = 
@@ -237,17 +236,17 @@ object SyntAnal9: TLibSyntAnalyzer
       ColumnTo = 0
     end
     item
-      DisplayName = 'Tick template tag'
-      StyleName = 'PHP tag'
-      Expression = '`|[a-z]\w*`'
+      DisplayName = 'Tick string'
+      StyleName = 'String'
+      TokenType = 4
+      Expression = '`.*?`'
       ColumnFrom = 0
       ColumnTo = 0
     end
     item
-      DisplayName = 'Id upcase const'
-      StyleName = 'Id upcase const'
-      TokenType = 2
-      Expression = '(?-i)[A-Z_\$][A-Z0-9_\$]*[A-Z][A-Z0-9_\$]* (?=[^\w\(])'
+      DisplayName = 'Tick template tag'
+      StyleName = 'PHP tag'
+      Expression = '(?-i)(html|css|json)`'
       ColumnFrom = 0
       ColumnTo = 0
     end
@@ -948,28 +947,28 @@ object SyntAnal9: TLibSyntAnalyzer
       StatesRemove = 1
       StartExpression = '/\*{2,}(?!/)'
       EndExpression = '\*/'
-      SyntAnalyzer = SyntAnal10
+      SyntAnalyzer = SyntAnal11
     end
     item
       DisplayName = 'Template HTML'
       StyleName = 'Sublexer BG'
       StartExpression = '(?-i)\bhtml`'
-      EndExpression = '`'
-      SyntAnalyzer = SyntAnal8
+      EndExpression = '(?<![\{])`'
+      SyntAnalyzer = SyntAnal9
     end
     item
       DisplayName = 'Template JSON'
       StyleName = 'Sublexer BG'
       StartExpression = '(?-i)\bjson`'
-      EndExpression = '`'
-      SyntAnalyzer = SyntAnal11
+      EndExpression = '(?<![\{])`'
+      SyntAnalyzer = SyntAnal12
     end
     item
       DisplayName = 'Template CSS'
       StyleName = 'Sublexer BG'
       StartExpression = '(?-i)\bcss`'
-      EndExpression = '`'
-      SyntAnalyzer = SyntAnal6
+      EndExpression = '(?<![\{])`'
+      SyntAnalyzer = SyntAnal7
     end>
   SampleText.Strings = (
     '#!/bin/bash                         '
