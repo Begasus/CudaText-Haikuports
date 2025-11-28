@@ -35,6 +35,7 @@ EVENTS = [
     'on_open',
     'on_open_none',
     'on_open_pre',
+    'on_open_reopen',
     'on_output_nav',
     'on_paste',
     'on_save',
@@ -47,6 +48,7 @@ EVENTS = [
     'on_start2',
     'on_state',
     'on_state_ed',
+    'on_state_findbar',
     'on_tab_change',
     'on_tab_menu',
     'on_tab_move',
@@ -76,5 +78,6 @@ EVENTS_ADD_PARAMS = {
   'on_snippet': 'snippet_id, snippet_text',
   'on_state': 'state',
   'on_state_ed': 'state',
+  'on_state_findbar': 'state, value',
   'on_sidebar_popup': 'caption',
   }

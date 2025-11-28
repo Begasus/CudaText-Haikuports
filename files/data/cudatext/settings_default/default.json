@@ -504,7 +504,9 @@
   //Note: only for "scrollbar_themed":true .
   "scroll_style_horz": 2,
 
-  //Use custom-painted scrollbars in editor, instead of OS-painted scrollbars.
+  //Use custom-painted scrollbars in the editor / Code-Tree / Project Manager / etc,
+  //instead of OS-painted scrollbars.
+  //Changing requires app restart.
   "scrollbar_themed": true,
 
   //Width of (application-themed) scrollbars, before applying UI scaling.
@@ -895,6 +897,19 @@
   "ui_scale_font__linux": 100,
   "ui_scale_font__mac": 100,
 
+  //Allows auto-switching of light/dark theme depending on OS dark mode.
+  //Names of light/dark themes must be set via "ui_theme_light" and "ui_theme_dark".
+  "ui_theme_auto_mode": false,
+
+  //Name of light theme for "ui_theme_auto_mode":true.
+  //Empty string means the default light theme.
+  //User must have both UI & syntax theme of the same name.
+  "ui_theme_light": "syn",
+
+  //Name of dark theme for "ui_theme_auto_mode":true.
+  //User must have both UI & syntax theme of the same name.
+  "ui_theme_dark": "sub",
+
   //[UI/Tabs]
   //UI tabs: Global visibility flag for UI-tabs. When 'false', UI-tabs are hidden.
   "ui_tab_show": true,
@@ -1001,19 +1016,20 @@
   "ui_tab_preview_font_style": "iu",
 
   //[UI/Listbox]
-  //Listboxes: Commands/API listbox width.
+  //Listboxes: Width of menu-like dialogs (e.g. Command Palette and plugins).
   "ui_listbox_size_x": 450,
 
-  //Listboxes: Commands/API listbox height.
+  //Listboxes: Height of menu-like dialogs (e.g. Command Palette and plugins).
   "ui_listbox_size_y": 300,
 
-  //Listboxes: Auto-completion listbox width, in pixels.
+  //Listboxes: Width of auto-completion listbox, in pixels.
   "ui_listbox_complete_size_x": 550,
 
-  //Listboxes: Auto-completion listbox height, in items.
+  //Listboxes: Height of auto-completion listbox, in items.
   "ui_listbox_complete_size_items": 12,
 
-  //Listboxes: Enable fuzzy search in menu dialogs (see Wiki).
+  //Listboxes: Enable fuzzy search in menu-like dialogs (e.g. Command Palette and plugins).
+  //Wiki describes what is "fuzzy search".
   "ui_listbox_fuzzy": true,
 
   //[UI/History]
@@ -1123,7 +1139,8 @@
   "ui_tree_filter_layout": 1,
 
   //Show nodes of sublexer(s) in code-tree.
-  //Used for example for JavaScript inside PHP. Requires program restart.
+  //Used for example for JavaScript inside PHP.
+  //Option is applied after app restart.
   "ui_tree_sublexers": false,
 
   //Maximal time, in milliseconds, of the code-tree filling procedure.
@@ -1249,6 +1266,11 @@
   //  2: activate by double click
   "mouse_click_links": 2,
 
+  //Delay (in msec) before app fires the "mouse entered a hotspot area" event, which is
+  //used in e.g. LSP_Client / HTML-CSS-Markdown_Tooltips plugins.
+  //Note: this option is global, not per-lexer.
+  "mouse_hotspot_delay": 500,
+
   //[Keys]
   //Key BackSpace: do Unindent command, if caret is inside indented area.
   "key_bksp_unindent": true,
@@ -1290,6 +1312,10 @@
   //when Up key is pressed on first line - jump to the very beginning;
   //when Down key is pressed on last line - jump to the very ending.
   "key_up_down_allow_edge": true,
+
+  //Keys Up/Down: try to jump to opposite selection edge.
+  //Value true: like in Sublime Text 4, value false: like in Notepad++.
+  "key_up_down_swap_sel": true,
 
   //Keys Left/Right-arrows: with "caret_after_end":false, option allows carets
   //(when at least 2 carets exist) go to next/previous line.
@@ -1515,12 +1541,6 @@
   //Commenting: If selected >1 lines, insert comment at maximal common indent.
   "comment_equal_column": false,
 
-  //Command "Duplicate line (advanced)": If no selection, duplicate entire line.
-  "duplicate_full_line_if_no_sel": true,
-
-  //Command "Duplicate line (advanced)": If no selection, move caret to next line.
-  "duplicate_move_down": true,
-
   //[Text/Completion]
   //Enable auto-completion from data/autocomplete/*.acp files (static lists of words).
   //These *.acp files exist only for small amount of lexers.
@@ -1672,7 +1692,7 @@
   "ui_toolbar_theme": "default_24x24",
 
   //Show main menu bar.
-  //Note: option takes effect only after app restart.
+  //Option is applied after app restart.
   "ui_menu_show": true,
 
   //Top menu bar is themed (Windows only, not possible in other OS).

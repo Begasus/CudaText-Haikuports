@@ -108,19 +108,15 @@ BOOKMARK_SET         = 1
 BOOKMARK_CLEAR       = 2
 BOOKMARK_CLEAR_ALL   = 3
 BOOKMARK_SETUP       = 4
-BOOKMARK_GET_LIST    = 5
 BOOKMARK_GET_ALL     = 6
-BOOKMARK_GET_PROP      = 7
 BOOKMARK_DELETE_BY_TAG = 8
 
 BOOKMARK2_SET         = 11
 BOOKMARK2_CLEAR       = 12
 BOOKMARK2_CLEAR_ALL   = 13
 BOOKMARK2_GET_ALL     = 16
-BOOKMARK2_GET_PROP      = 17
 BOOKMARK2_DELETE_BY_TAG = 18
 
-MARKERS_GET           = 0
 MARKERS_ADD           = 1
 MARKERS_DELETE_ALL    = 2
 MARKERS_DELETE_LAST   = 3
@@ -368,6 +364,7 @@ PROC_SIDEPANEL_GET         = 31
 PROC_SIDEPANEL_SET_PROP    = 32
 PROC_SIDEPANEL_GET_IMAGELIST = 33
 #
+PROC_GET_FINDER_BUTTONS = 35
 PROC_GET_FINDER_PROP   = 36
 PROC_SET_FINDER_PROP   = 37
 PROC_SPLITTER_GET      = 38
@@ -467,7 +464,6 @@ PROC_CONFIG_SCALE_SET      = 176
 PROC_CONFIG_HISTORY_SAVE   = 177
 
 TREE_ITEM_ENUM_EX          = 0
-TREE_ITEM_ENUM             = 1
 TREE_ITEM_ADD              = 2
 TREE_ITEM_DELETE           = 3
 TREE_ITEM_SET_TEXT         = 4
@@ -499,8 +495,6 @@ LISTBOX_GET_COUNT    = 0
 LISTBOX_ADD          = 1
 LISTBOX_DELETE       = 2
 LISTBOX_DELETE_ALL   = 3
-LISTBOX_GET_ITEM     = 4
-LISTBOX_SET_ITEM     = 5
 LISTBOX_GET_HOTTRACK = 6
 LISTBOX_SET_HOTTRACK = 7
 LISTBOX_GET_ITEM_PROP = 8
@@ -533,6 +527,7 @@ LISTBOX_GET_HEADER_IMAGELIST = 38
 LISTBOX_SET_HEADER_IMAGELIST = 39
 LISTBOX_GET_HEADER_IMAGEINDEXES = 40
 LISTBOX_SET_HEADER_IMAGEINDEXES = 41
+LISTBOX_SET_DISABLING_CHAR = 43
 
 SCROLLSTYLE_HIDE = 0
 SCROLLSTYLE_SHOW = 1
@@ -972,7 +967,6 @@ DBORDER_TOOL     = 4
 DBORDER_TOOLSIZE = 5
 
 DECOR_GET_ALL          = 0
-DECOR_GET              = 1
 DECOR_SET              = 2
 DECOR_DELETE_BY_LINE   = 5
 DECOR_DELETE_BY_TAG    = 6
@@ -1022,6 +1016,37 @@ HINTPOS_TEXT          = 2
 HINTPOS_TEXT_BRACKET  = 3
 HINTPOS_WINDOW_TOP    = 8
 HINTPOS_WINDOW_BOTTOM = 9
+
+CURSOR_DEFAULT      = 0
+CURSOR_NONE         = -1
+CURSOR_ARROW        = -2
+CURSOR_CROSS        = -3
+CURSOR_I_BEAM       = -4
+CURSOR_SIZE_NESW    = -6
+CURSOR_SIZE_NS      = -7
+CURSOR_SIZE_NWSE    = -8
+CURSOR_SIZE_WE      = -9
+CURSOR_UP_ARROW     = -10
+CURSOR_HOURGLASS    = -11
+CURSOR_DRAG         = -12
+CURSOR_NO_DROP      = -13
+CURSOR_H_SPLIT      = -14
+CURSOR_V_SPLIT      = -15
+CURSOR_MULTI_DRAG   = -16
+CURSOR_SQL_WAIT     = -17
+CURSOR_NO           = -18
+CURSOR_APP_START    = -19
+CURSOR_HELP         = -20
+CURSOR_HAND_POINT   = -21
+CURSOR_SIZE_ALL     = -22
+CURSOR_SIZE_NW      = -23
+CURSOR_SIZE_N       = -24
+CURSOR_SIZE_NE      = -25
+CURSOR_SIZE_W       = -26
+CURSOR_SIZE_E       = -27
+CURSOR_SIZE_SW      = -28
+CURSOR_SIZE_S       = -29
+CURSOR_SIZE_SE      = -30
 
 API, EXE_VER = ct.app_ver()
 
@@ -1128,7 +1153,7 @@ def dlg_custom(title, size_x, size_y, text, focused=-1, get_dict=False):
     if not get_dict:
         return res
     else:
-        return _dlg_custom_dict(res, count=len(text.splitlines()) )
+        return _dlg_custom_dict(res, count=len(text.split('\n')) )
 
 def file_open(name, group=-1, options=''):
     if isinstance(name, (list, tuple)):
@@ -1384,6 +1409,9 @@ class Editor:
 
     def save(self, filename='', as_copy=False):
         return ct.ed_save(self.h, filename, as_copy)
+
+    def load(self, filename):
+        return ct.ed_load(self.h, filename)
 
     def cmd(self, code, text=''):
         return ct.ed_cmd(self.h, code, esc_z(text))

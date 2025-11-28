@@ -7,23 +7,40 @@ homepage=https://github.com/CudaText-addons/cuda_sort
 
 [item1]
 section=commands
-caption=Sort\Sort, asc.
-method=sort_asc
+caption=Sort\Sort ascending, ignore case
+method=sort_asc_nocase
 
 [item2]
 section=commands
-caption=Sort\Sort, desc.
-method=sort_desc
+caption=Sort\Sort ascending, case sensitive
+method=sort_asc
 
 [item3]
 section=commands
-caption=Sort\Sort, asc., ignore case
-method=sort_asc_nocase
+caption=Sort\Sort descending, ignore case
+method=sort_desc_nocase
 
 [item4]
 section=commands
-caption=Sort\Sort, desc., ignore case
-method=sort_desc_nocase
+caption=Sort\Sort descending, case sensitive
+method=sort_desc
+
+[item10]
+section=commands
+caption=Sort\Fast native-code commands, but without Undo\(without Undo) Sort ascending, ignore case
+method=native_sort_asc_nocase
+[item11]
+section=commands
+caption=Sort\Fast native-code commands, but without Undo\(without Undo) Sort ascending, case sensitive
+method=native_sort_asc_casesens
+[item12]
+section=commands
+caption=Sort\Fast native-code commands, but without Undo\(without Undo) Sort descending, ignore case
+method=native_sort_desc_nocase
+[item13]
+section=commands
+caption=Sort\Fast native-code commands, but without Undo\(without Undo) Sort descending, case sensitive
+method=native_sort_desc_casesens
 
 [item19]
 section=commands

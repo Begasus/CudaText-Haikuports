@@ -228,43 +228,38 @@ class Command:
 
         (_("New file..."), "dir", [NODE_DIR], "cuda_project_man.action_new_file", S_CTRL_NAME + "+N"),
         (_("New folder..."), "dir", [NODE_DIR], "cuda_project_man.action_new_directory", "F7"),
-        (_("-"), "dir", [NODE_DIR], "", ""),
+        ("-", "dir", [NODE_DIR], "", ""),
         (_("Cut"), "dir", [NODE_DIR], "cuda_project_man.action_cut", S_CTRL_NAME + "+X"),
         (_("Copy"), "dir", [NODE_DIR], "cuda_project_man.action_copy", S_CTRL_NAME + "+C"),
         (_("Paste"), "dir", [NODE_DIR], "cuda_project_man.action_paste", S_CTRL_NAME + "+V"),
-        (_("-"), "dir", [NODE_DIR], "", ""),
-        (_("Rename..."), "dir", [NODE_DIR], "cuda_project_man.action_rename", "F2"),
-        (_("Delete"), "dir", [NODE_DIR], "cuda_project_man.action_delete_directory", "Del"),
-        (_("-"), "dir", [NODE_DIR], "", ""),
-        (_("Find in folder..."), "dir", [NODE_DIR], "cuda_project_man.action_find_in_directory", ""),
-        (_("-"), "dir", [NODE_DIR], "", ""),
+        ("-", "dir", [NODE_DIR], "", ""),
         (_("Copy path"), "dir", [NODE_DIR], "cuda_project_man.action_copy_path", ""),
         (_("Copy relative path") , "dir", [NODE_DIR], "cuda_project_man.action_copy_relative_path", ""),
-        (_("-"), "dir", [NODE_DIR], "", ""),
+        ("-", "dir", [NODE_DIR], "", ""),
+        (_("Rename..."), "dir", [NODE_DIR], "cuda_project_man.action_rename", "F2"),
         (_("Duplicate..."), "dir", [NODE_DIR], "cuda_project_man.action_duplicate", ""),
-        (_("-"), "dir", [NODE_DIR], "", ""),
+        (_("Delete"), "dir", [NODE_DIR], "cuda_project_man.action_delete_directory", "Del"),
+        ("-", "dir", [NODE_DIR], "", ""),
+        (_("Find in folder..."), "dir", [NODE_DIR], "cuda_project_man.action_find_in_directory", ""),
+        ("-", "dir", [NODE_DIR], "", ""),
         (_("Focus in file manager"), "dir", [NODE_DIR], "cuda_project_man.action_focus_in_fileman", ""),
-        (_("-"), "dir", [NODE_DIR], "", ""),
         (_("Properties..."), "dir", [NODE_DIR], "cuda_project_man.action_get_properties", ""),
 
         (_("Open in default application"), "file", [NODE_FILE], "cuda_project_man.action_open_def", ""),
-        (_("-"), "file", [NODE_FILE], "", ""),
+        ("-", "file", [NODE_FILE], "", ""),
         (_("Cut"), "file", [NODE_FILE], "cuda_project_man.action_cut", S_CTRL_NAME + "+X"),
         (_("Copy"), "file", [NODE_FILE], "cuda_project_man.action_copy", S_CTRL_NAME + "+C"),
         (_("Paste"), "file", [NODE_FILE], "cuda_project_man.action_paste", S_CTRL_NAME + "+V"),
-        (_("-"), "file", [NODE_FILE], "", ""),
+        ("-", "file", [NODE_FILE], "", ""),
         (_("Copy path"), "file", [NODE_FILE], "cuda_project_man.action_copy_path", ""),
         (_("Copy relative path"), "file", [NODE_FILE], "cuda_project_man.action_copy_relative_path", ""),
-        (_("-"), "file", [NODE_FILE], "", ""),
+        ("-", "file", [NODE_FILE], "", ""),
         (_("Rename..."), "file", [NODE_FILE], "cuda_project_man.action_rename", "F2"),
-        (_("Delete"), "file", [NODE_FILE], "cuda_project_man.action_delete_file", "Del"),
-        (_("-"), "file", [NODE_FILE], "", ""),
         (_("Duplicate..."), "file", [NODE_FILE], "cuda_project_man.action_duplicate", ""),
-        (_("-"), "file", [NODE_FILE], "", ""),
-        (_("Set as main file"), "file", [NODE_FILE], "cuda_project_man.action_set_as_main_file", ""),
-        (_("-"), "file", [NODE_FILE], "", ""),
+        (_("Delete"), "file", [NODE_FILE], "cuda_project_man.action_delete_file", "Del"),
+        ("-", "file", [NODE_FILE], "", ""),
         (_("Focus in file manager"), "file", [NODE_FILE], "cuda_project_man.action_focus_in_fileman", ""),
-        (_("-"), "file", [NODE_FILE], "", ""),
+        (_("Set as main file"), "file", [NODE_FILE], "cuda_project_man.action_set_as_main_file", ""),
         (_("Properties..."), "file", [NODE_FILE], "cuda_project_man.action_get_properties", ""),
 
         ("-"   , "", [None, NODE_PROJECT, NODE_DIR, NODE_FILE, NODE_BAD], "", ""),
@@ -384,6 +379,9 @@ class Command:
         self.ICON_ZIP = self.icon_get('_zip')
         self.ICON_BIN = self.icon_get('_bin')
         self.ICON_IMG = self.icon_get('_img')
+        self.ICON_TEXT = self.icon_get('_text')
+        self.ICON_AUDIO = self.icon_get('_audio')
+        self.ICON_VIDEO = self.icon_get('_video')
 
 
     def init_panel(self, and_activate=True):
@@ -983,8 +981,8 @@ class Command:
             )
 
             #select 1st node
-            items_root = tree_proc(self.tree, TREE_ITEM_ENUM, 0)
-            tree_proc(self.tree, TREE_ITEM_SELECT, items_root[0][0])
+            items_root = tree_proc(self.tree, TREE_ITEM_ENUM_EX, 0)
+            tree_proc(self.tree, TREE_ITEM_SELECT, items_root[0]['id'])
 
             nodes = map(Path, self.project["nodes"])
             if sort_order != '':
@@ -1038,6 +1036,12 @@ class Command:
                 imageindex = self.ICON_ZIP
             elif is_simple_listed(path.name, MASKS_BINARY):
                 imageindex = self.ICON_BIN
+            elif is_simple_listed(path.name, MASKS_TEXT):
+                imageindex = self.ICON_TEXT
+            elif is_simple_listed(path.name, MASKS_AUDIO):
+                imageindex = self.ICON_AUDIO
+            elif is_simple_listed(path.name, MASKS_VIDEO):
+                imageindex = self.ICON_VIDEO
             else:
                 lexname = lexer_proc(LEXER_DETECT, path.name)
                 if lexname:
@@ -1342,14 +1346,15 @@ class Command:
 
     def do_unfold_first(self):
         """unfold 1st item under root"""
-        items = tree_proc(self.tree, TREE_ITEM_ENUM, 0)
+        items = tree_proc(self.tree, TREE_ITEM_ENUM_EX, 0)
         if not items:
             return
-        items = tree_proc(self.tree, TREE_ITEM_ENUM, items[0][0])
+        h_first = items[0]['id']
+        items = tree_proc(self.tree, TREE_ITEM_ENUM_EX, h_first)
         if not items:
             return
-        tree_proc(self.tree, TREE_ITEM_UNFOLD, items[0][0])
-        tree_proc(self.tree, TREE_ITEM_SELECT, items[0][0])
+        tree_proc(self.tree, TREE_ITEM_UNFOLD, h_first)
+        tree_proc(self.tree, TREE_ITEM_SELECT, h_first)
 
         path = self.get_location_by_index(self.selected)
         app_proc(PROC_SET_FOLDER, path)
@@ -1519,9 +1524,9 @@ class Command:
         Enum for all items.
         Until callback gets false.
         """
-        items = tree_proc(self.tree, TREE_ITEM_ENUM, 0)
+        items = tree_proc(self.tree, TREE_ITEM_ENUM_EX, 0)
         if items:
-            return self.enum_subitems(items[0][0], callback)
+            return self.enum_subitems(items[0]['id'], callback)
 
     def enum_subitems(self, item, callback):
         """
@@ -1541,9 +1546,9 @@ class Command:
 
 
     def enum_all_getfolds(self, unfolds):
-        items = tree_proc(self.tree, TREE_ITEM_ENUM, 0)
+        items = tree_proc(self.tree, TREE_ITEM_ENUM_EX, 0)
         if items:
-            return self.enum_subitems_getfolds(items[0][0], unfolds)
+            return self.enum_subitems_getfolds(items[0]['id'], unfolds)
 
     def enum_subitems_getfolds(self, item, unfolds):
         items = tree_proc(self.tree, TREE_ITEM_ENUM_EX, item)
@@ -1562,9 +1567,9 @@ class Command:
     def enum_all_setfolds(self, unfolds):
         if not unfolds:
             return
-        items = tree_proc(self.tree, TREE_ITEM_ENUM, 0)
+        items = tree_proc(self.tree, TREE_ITEM_ENUM_EX, 0)
         if items:
-            return self.enum_subitems_setfolds(items[0][0], unfolds)
+            return self.enum_subitems_setfolds(items[0]['id'], unfolds)
 
     def enum_subitems_setfolds(self, item, unfolds):
         items = tree_proc(self.tree, TREE_ITEM_ENUM_EX, item)
@@ -1586,9 +1591,9 @@ class Command:
         Enum for all items.
         Find 'filename', and focus its node.
         """
-        items = tree_proc(self.tree, TREE_ITEM_ENUM, 0)
+        items = tree_proc(self.tree, TREE_ITEM_ENUM_EX, 0)
         if items:
-            return self.enum_subitems_fn(items[0][0], filename, and_open)
+            return self.enum_subitems_fn(items[0]['id'], filename, and_open)
 
     def enum_subitems_fn(self, item_src, filename, and_open):
         """
@@ -1628,9 +1633,9 @@ class Command:
         Enum for all items.
         Find 'filename', and select/show its node.
         """
-        items = tree_proc(self.tree, TREE_ITEM_ENUM, 0)
+        items = tree_proc(self.tree, TREE_ITEM_ENUM_EX, 0)
         if items:
-            return self.enum_subitems_sel(items[0][0], filename)
+            return self.enum_subitems_sel(items[0]['id'], filename)
 
     def enum_subitems_sel(self, item_src, filename):
         """
@@ -1722,10 +1727,10 @@ class Command:
 
         if info.image != self.ICON_DIR:
             return
-        items = tree_proc(self.tree, TREE_ITEM_ENUM, data)
+        items = tree_proc(self.tree, TREE_ITEM_ENUM_EX, data)
         if items:
-            for handle, _ in items:
-                tree_proc(self.tree, TREE_ITEM_DELETE, handle)
+            for item in items:
+                tree_proc(self.tree, TREE_ITEM_DELETE, item['id'])
 
         self.action_refresh_int(data) # call _int version, to avoid recursion
 
@@ -1749,6 +1754,11 @@ class Command:
 
         if not os.path.isfile(str(path)):
             tree_proc(self.tree, TREE_ITEM_SET_ICON, self.selected, image_index=self.ICON_BAD)
+            return
+
+        open_def_ext = tuple(MASKS_ZIP.split(' ') + MASKS_BINARY.split(' ') + MASKS_AUDIO.split(' ') + MASKS_VIDEO.split(' '))
+        if info.caption.endswith(open_def_ext):
+            self.action_open_def()
             return
 
         _file_open(str(path), options=options)
