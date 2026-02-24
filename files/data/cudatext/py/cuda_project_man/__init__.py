@@ -66,7 +66,7 @@ def _file_ext(fn):
 def _file_editor(fn):
     for h in ed_handles():
         e = Editor(h)
-        if e.get_filename()==fn:
+        if e.get_filename('*')==fn:
             return e
     return None
 
@@ -662,7 +662,7 @@ class Command:
         # fix filename of existing ui-tab
         for h in ed_handles():
             e = Editor(h)
-            if e.get_filename()==str(location):
+            if e.get_filename('*')==str(location):
                 e.save(str(new_location))
 
         self.action_refresh()
@@ -1036,8 +1036,6 @@ class Command:
                 imageindex = self.ICON_ZIP
             elif is_simple_listed(path.name, MASKS_BINARY):
                 imageindex = self.ICON_BIN
-            elif is_simple_listed(path.name, MASKS_TEXT):
-                imageindex = self.ICON_TEXT
             elif is_simple_listed(path.name, MASKS_AUDIO):
                 imageindex = self.ICON_AUDIO
             elif is_simple_listed(path.name, MASKS_VIDEO):
@@ -1046,6 +1044,8 @@ class Command:
                 lexname = lexer_proc(LEXER_DETECT, path.name)
                 if lexname:
                     imageindex = self.icon_get(lexname)
+                elif is_simple_listed(path.name, MASKS_TEXT):
+                    imageindex = self.ICON_TEXT
                 else:
                     imageindex = self.ICON_ALL
 
@@ -1709,7 +1709,7 @@ class Command:
             msg_status(_('Project not loaded'))
             return
 
-        fn = ed.get_filename()
+        fn = ed.get_filename('*')
         if fn:
             if self.jump_to_filename(fn): #gets False if found
                 msg_status(_('Cannot jump to file: ') + collapse_filename(fn))
@@ -1749,7 +1749,10 @@ class Command:
         if not path:
             return
 
-        if info.image in [self.ICON_BAD, self.ICON_DIR, self.ICON_PROJ]:
+        if info.image == self.ICON_DIR:
+            tree_proc(self.tree, TREE_ITEM_UNFOLD if tree_proc(self.tree, TREE_ITEM_GET_PROPS, self.selected)['folded'] else TREE_ITEM_FOLD, self.selected)
+            return
+        elif info.image in [self.ICON_BAD, self.ICON_PROJ]:
             return
 
         if not os.path.isfile(str(path)):
@@ -1854,10 +1857,11 @@ class Command:
         return node_type
 
     def form_key_down(self, id_dlg, id_ctl, data):
-        if id_ctl in [VK_SPACE, VK_ENTER, VK_F4]:
+        reg_key = ('a' in data) or ('c' in data) or ('s' in data) or ('m' in data)
+        if id_ctl in [VK_SPACE, VK_ENTER, VK_F4] and not reg_key:
             self.do_open_current_file(self.get_open_options())
             return False #block key
-        elif id_ctl == VK_DELETE:
+        elif id_ctl == VK_DELETE and not reg_key:
             node_type = self.get_node_type()
             if node_type == NODE_FILE:
                 self.action_delete_file()
@@ -1867,10 +1871,10 @@ class Command:
         elif (id_ctl == VK_F5) or (data == S_CTRL_API and (id_ctl in (ord('r'), ord('R')))):
             self.action_refresh()
             return False #block key
-        elif id_ctl == VK_F2:
+        elif id_ctl == VK_F2 and not reg_key:
             self.action_rename()
             return False #block key
-        elif id_ctl == VK_F7:
+        elif id_ctl == VK_F7 and not reg_key:
             self.action_new_directory()
             return False #block key
         elif (data == S_CTRL_API and (id_ctl in (ord('n'), ord('N')))):
@@ -1891,7 +1895,7 @@ class Command:
         if not self.tree:
             self.init_panel(False)
 
-        fn = ed.get_filename()
+        fn = ed.get_filename('*')
         self.add_node(fn)
 
     def add_current_dir(self):
@@ -1899,7 +1903,7 @@ class Command:
         if not self.tree:
             self.init_panel(False)
 
-        fn = ed.get_filename()
+        fn = ed.get_filename('*')
         if fn:
             d = os.path.dirname(fn)
             if not (IS_WIN and d.endswith(':\\')):
@@ -1912,7 +1916,7 @@ class Command:
 
         for h in ed_handles():
             e = Editor(h)
-            fn = e.get_filename()
+            fn = e.get_filename('*')
             self.add_node(fn)
 
 

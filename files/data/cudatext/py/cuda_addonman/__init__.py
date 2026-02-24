@@ -47,6 +47,7 @@ STD_LEXERS = (
   'Bash script',
   'Batch files',
   'CSS',
+  'Diff',
   'HTML',
   'HTML style',
   'JavaScript',
@@ -66,6 +67,7 @@ STD_LEXERS_LITE = (
   'Log files',
   'SQL',
   'XML',
+  'Config-RC',
 )
 STD_THEMES = (
   'amy',
