@@ -78,7 +78,6 @@ STD_THEMES = (
   'navy',
   'sub',
   'syn',
-  'white',
 )
 STD_TOOLBARICONS = (
   'default_24x24',
@@ -130,7 +129,7 @@ class Command:
 
     def do_show_links(self):
 
-        msg_status(_('Downloading list...'))
+        # msg_status(_('Downloading list...'))
         items = get_remote_addons_list(opt.ch_def+opt.ch_user)
         msg_status('')
         if not items:
@@ -153,7 +152,7 @@ class Command:
             msg_box(_('Cannot create dir: ')+dir_for_all, MB_OK+MB_ICONERROR)
             return
 
-        msg_status(_('Downloading list...'))
+        # msg_status(_('Downloading list...'))
         items = get_remote_addons_list(opt.ch_def+opt.ch_user)
         msg_status('')
         if not items:
@@ -229,7 +228,7 @@ class Command:
     def do_install_addon(self):
 
         caption = _('Install')
-        msg_status(_('Downloading list...'))
+        # msg_status(_('Downloading list...'))
         items = get_remote_addons_list(opt.ch_def+opt.ch_user)
         msg_status('')
         if not items:
@@ -474,7 +473,7 @@ class Command:
         dir_data = DIR_DATA
         dir_py = DIR_PY
 
-        msg_status(_('Downloading list...'))
+        # msg_status(_('Downloading list...'))
         addons = get_remote_addons_list(opt.ch_def+opt.ch_user)
         msg_status('')
         if not addons:
@@ -630,7 +629,7 @@ class Command:
                     try:
                         subprocess.call(['git', 'stash', 'save'], cwd=m_dir)
                         subprocess.call(['git', 'pull'], cwd=m_dir)
-                    except:
+                    except Exception:
                         msg_status(_('Error running Git'), True)
                         print(_('  Error running Git'))
                 else:
@@ -714,7 +713,7 @@ class Command:
 
         dlg_proc(self.h_pro, DLG_CTL_PROP_SET, name='pro', prop={'val': percent,})
         dlg_proc(self.h_pro, DLG_CTL_PROP_SET, name='inf', prop={'cap': text,})
-        app_idle(False)
+        app_proc(PROC_IDLE, False)
 
     def hide_progress(self):
 

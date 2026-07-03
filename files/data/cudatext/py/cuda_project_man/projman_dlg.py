@@ -45,14 +45,14 @@ def dialog_config(op):
     try:
         s = op.get('icon_theme', 'vscode_16x16')
         theme_index = themes.index(s)
-    except:
+    except Exception:
         theme_index = -1
 
     themes_tb = get_themes_toolbar()
     try:
         s = op.get('toolbar_theme', 'default_16x16')
         theme_index_tb = themes_tb.index(s)
-    except:
+    except Exception:
         theme_index_tb = -1
 
     items_sort_id = [
@@ -102,8 +102,8 @@ def dialog_config(op):
             'val='+bool_to_str(op.get('preview', True)) ])]
         +[c1.join(['type=check', 'pos=6,288,400,0', 'cap='+_('Open files by &double-click'),
             'val='+bool_to_str(op.get('d_click', False)) ])]
-        +[c1.join(['type=check', 'pos=6,314,400,0', 'cap='+_('On opening file in Git/SVN repo, create project from repo (*)'),
-            'val='+bool_to_str(op.get('check_git', True)) ])]
+        +[c1.join(['type=check', 'pos=6,314,400,0', 'en=0', 'cap='+_('On opening file in Git/SVN repo, create project from repo (*)'),
+            'val='+bool_to_str(op.get('check_git', False)) ])]
         +[c1.join(['type=check', 'pos=6,340,400,0', 'cap='+_('Suggest to close tabs not belonging to project'),
             'val='+bool_to_str(op.get('close_ext', True)) ])]
         +[c1.join(['type=check', 'pos=6,366,400,0', 'cap='+_('Always sync project-tree with current editor file'),

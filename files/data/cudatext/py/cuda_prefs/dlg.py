@@ -222,7 +222,7 @@ def format_opt_change(ch):
     scope_str = ch.scope
     if   ch.scope=='u': scope_str = ui_column(COL_VAL_USER)
     elif ch.scope=='l': scope_str = ui_column(COL_VAL_LEX) +': '+str(ch.lexer)
-    elif ch.scope=='f': scope_str = ui_column(COL_VAL_FILE)+': '+os.path.basename(ed.get_filename())
+    elif ch.scope=='f': scope_str = ui_column(COL_VAL_FILE)+': '+os.path.basename(ed.get_prop(PROP_FN, ''))
 
     if ch.value is None:    val_str = _('reset')
     else:                   val_str = '{} -> {}'.format(ch.old_value, ch.value)
@@ -262,7 +262,7 @@ class DialogMK2:
         # gather not-available scopes
         self.hidden_scopes = [] # 'l' and/or 'f'
         if (how  and  how.get('hide_fil')  or  how.get('hide_lex_fil')  or  how.get('only_for_ul')) \
-                                                                            or not ed.get_filename():
+                                                                            or not ed.get_prop(PROP_FN, ''):
             self.hidden_scopes.append('f')
         if how.get('hide_lex_fil')  or  not ed.get_prop(PROP_LEXER_FILE):
             self.hidden_scopes.append('l')
@@ -848,8 +848,8 @@ class DialogMK2:
         if lex  and  'l' not in self.hidden_scopes:
             scopes.append(ui_column(COL_VAL_LEX)+': '+lex)
             self._scope_captions['l'] = scopes[-1]
-        if ed.get_filename()  and  'f' not in self.hidden_scopes:
-            filename = os.path.split(ed.get_filename())[1]
+        if ed.get_prop(PROP_FN, '')  and  'f' not in self.hidden_scopes:
+            filename = os.path.split(ed.get_prop(PROP_FN, ''))[1]
             scopes.append(ui_column(COL_VAL_FILE)+': '+filename)
             self._scope_captions['f'] = scopes[-1]
         self.scope_ed = Editor(h_scope_ed)
@@ -1320,7 +1320,7 @@ class DialogMK2:
             cur_scol = self.val_eds.val_edit.get_text_all()
             try:
                 int_col = apx.html_color_to_int(cur_col)
-            except:
+            except Exception:
                 int_col = 0xffffff
 
             val = dlg_color(int_col)
@@ -1328,7 +1328,7 @@ class DialogMK2:
             if val is not None:
                 try:
                     val = apx.int_to_html_color(val)
-                except:
+                except Exception:
                     val = None
 
         elif prop_type == 'file':
@@ -1664,7 +1664,7 @@ class ValueEds:
                 else:
                     try:
                         apx.html_color_to_int(val)
-                    except:
+                    except Exception:
                         msg_status(_('Incorrect color token: ') + val)
                         return
             return val
@@ -1803,7 +1803,7 @@ class ValueEds:
     def update_ed_color(edt):
         try:
             int_col = apx.html_color_to_int(edt.get_text_all())
-        except:     # invalid color -> reset to theme color
+        except Exception:     # invalid color -> reset to theme color
             colors = app_proc(PROC_THEME_UI_DICT_GET, '')
             int_col = colors['EdGutterBg']['color']
         edt.set_prop(PROP_COLOR, (COLOR_ID_GutterBg, int_col))

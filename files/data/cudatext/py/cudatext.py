@@ -65,6 +65,11 @@ LINENUM_NONE   = 1
 LINENUM_EACH10 = 2
 LINENUM_EACH5  = 3
 
+LINEEND_NONE = 0
+LINEEND_WIN  = 1
+LINEEND_UNIX = 2
+LINEEND_MAC  = 3
+
 COLOR_NONE = 0x1FFFFFFF
 COLOR_DEFAULT = 0x20000000
 
@@ -109,12 +114,14 @@ BOOKMARK_SET         = 1
 BOOKMARK_CLEAR       = 2
 BOOKMARK_CLEAR_ALL   = 3
 BOOKMARK_SETUP       = 4
+BOOKMARK_APPEND      = 5
 BOOKMARK_GET_ALL     = 6
 BOOKMARK_DELETE_BY_TAG = 8
 
 BOOKMARK2_SET         = 11
 BOOKMARK2_CLEAR       = 12
 BOOKMARK2_CLEAR_ALL   = 13
+BOOKMARK2_APPEND      = 15
 BOOKMARK2_GET_ALL     = 16
 BOOKMARK2_DELETE_BY_TAG = 18
 
@@ -198,7 +205,7 @@ PROP_LINE_NUMBERS          = 39
 PROP_VISIBLE_LINES         = 40
 PROP_VISIBLE_COLUMNS       = 41
 PROP_LINE_BOTTOM           = 42
-PROP_PICTURE               = 43
+PROP_HANDLE_IMAGE          = 43
 PROP_MINIMAP               = 44
 PROP_MICROMAP              = 45
 PROP_LINK_AT_POS           = 46
@@ -207,13 +214,12 @@ PROP_TAB_ID                = 48
 PROP_IN_SESSION            = 49
 PROP_COORDS                = 50
 PROP_ONE_LINE              = 51
-PROP_SCROLL_VERT           = 52
-PROP_SCROLL_HORZ           = 53
+PROP_FN                    = 52
+PROP_MICROMAP_WIDTH        = 53
 PROP_CODETREE              = 54
 PROP_EDITORS_LINKED        = 55
-PROP_IN_HISTORY            = 56
-PROP_SCROLL_VERT_SMOOTH    = 57
-PROP_SCROLL_HORZ_SMOOTH    = 58
+PROP_MICROMAP_ON_SCROLLBAR = 56
+PROP_MICROMAP_AT_LEFT      = 57
 PROP_KIND                  = 59
 PROP_V_MODE                = 60
 PROP_V_POS                 = 61
@@ -268,6 +274,7 @@ PROP_HANDLE_SELF        = 110
 PROP_HANDLE_PRIMARY     = 111
 PROP_HANDLE_SECONDARY   = 112
 PROP_HANDLE_PARENT      = 113
+PROP_HANDLE_PARENT2     = 114
 PROP_RECT_CLIENT        = 115
 PROP_RECT_TEXT          = 116
 PROP_THEMED             = 118
@@ -308,6 +315,8 @@ PROP_TAB_TITLE_REASON   = 163
 PROP_RULER_TEXT         = 164
 PROP_UNPRINTED_WRAPS    = 165
 PROP_LEXER_BUSY         = 166
+PROP_LINE_SPACE1        = 167
+PROP_LINE_SPACE2        = 168
 
 PROP_CORNER_TEXT          = 170
 PROP_CORNER_COLOR_FONT    = 171
@@ -347,6 +356,7 @@ PROC_SET_SESSION         = 5
 PROC_GET_CLIP_EX         = 6
 PROC_SET_FOLDER          = 7
 PROC_GET_COMMANDS        = 8
+PROC_IDLE                = 9
 PROC_GET_LAST_PLUGIN     = 11
 PROC_GET_GROUPING        = 12
 PROC_SET_GROUPING        = 13
@@ -369,7 +379,7 @@ PROC_SIDEPANEL_GET         = 31
 PROC_SIDEPANEL_SET_PROP    = 32
 PROC_SIDEPANEL_GET_IMAGELIST = 33
 #
-PROC_GET_FINDER_BUTTONS = 35
+PROC_GET_FINDER_HANDLES= 35
 PROC_GET_FINDER_PROP   = 36
 PROC_SET_FINDER_PROP   = 37
 PROC_SPLITTER_GET      = 38
@@ -457,7 +467,7 @@ PROC_GET_COMPILER_INFO = 162
 PROC_ENUM_ENCODINGS   = 163
 PROC_GET_AUTOCOMPLETION_INVOKE = 164
 PROC_GET_WINDOW_STATE = 165
-#PROC_SET_WINDOW_STATE = 166
+PROC_SET_WINDOW_STATE = 166
 PROC_SET_FILE_RECENTS = 167
 
 PROC_CONFIG_READ           = 169
@@ -597,12 +607,16 @@ APPSTATE_SESSION_LOAD  = 25
 APPSTATE_SESSION_LOAD_BEGIN = 26
 APPSTATE_SESSION_LOAD_FAIL  = 27
 APPSTATE_PROJECT            = 28
+APPSTATE_SESSION_SET        = 29
 APPSTATE_API_SUBCOMMANDS    = 30
 APPSTATE_API_MENU_ADD       = 31
 APPSTATE_API_MENU_REMOVE    = 32
 APPSTATE_API_MENU_CHANGE    = 33
 APPSTATE_TAB_SPLIT          = 34
 APPSTATE_TAB_SPLIT_V_H      = 35
+APPSTATE_SESSION_LOAD_BEGIN_PRE = 36
+APPSTATE_SESSION_SAVE_BEFORE = 37
+APPSTATE_SESSION_SAVE_AFTER = 38
 APPSTATE_WINDOW             = 39
 
 APPSTATE_CODETREE_CLEAR         = 40
@@ -625,6 +639,9 @@ EDSTATE_PINNED    = 4
 EDSTATE_READONLY  = 5
 EDSTATE_ZOOM      = 6
 EDSTATE_BOOKMARK  = 7
+EDSTATE_EXT_REMOVED  = 20
+EDSTATE_EXT_APPEARED = 21
+EDSTATE_EXT_MODIFIED = 22
 
 WND_NORMAL      = 0
 WND_MINIMIZED   = 1
@@ -690,12 +707,18 @@ CANVAS_SET_TESTPANEL = 9
 CANVAS_GET_TEXT_SIZE = 15
 CANVAS_TEXT          = 20
 CANVAS_LINE          = 21
+CANVAS_BITMAP        = 22
+CANVAS_BITMAP_SIZED  = 23
 CANVAS_PIXEL         = 24
+CANVAS_IMAGE         = 25
+CANVAS_IMAGE_SIZED   = 26
+CANVAS_GRADIENT      = 29
 CANVAS_RECT          = 30
 CANVAS_RECT_FRAME    = 31
 CANVAS_RECT_FILL     = 32
 CANVAS_RECT_ROUND    = 33
 CANVAS_POLYGON       = 35
+CANVAS_COPY_RECT     = 36
 CANVAS_ELLIPSE       = 40
 
 FONT_B = 1
@@ -816,10 +839,13 @@ DLG_COORD_SCREEN_TO_LOCAL = 41
 
 #storage of live callbacks
 _live = {}
+_one_shot = set()   # sid of TIMER_START_ONE callbacks; removed after they fire
 
 IMAGE_CREATE      = 0
 IMAGE_GET_SIZE    = 1
 IMAGE_LOAD        = 2
+IMAGE_GET_SIZE_UI = 3
+IMAGE_GET_BITMAP  = 4
 IMAGE_PAINT       = 5
 IMAGE_PAINT_SIZED = 6
 
@@ -1067,13 +1093,19 @@ CURSOR_SIZE_SW      = -28
 CURSOR_SIZE_S       = -29
 CURSOR_SIZE_SE      = -30
 
-API, EXE_VER = ct.app_ver()
+BITMAP_CREATE   = 0
+BITMAP_FREE     = 1
+BITMAP_SET_SIZE = 2
+BITMAP_GET_SIZE = 3
+BITMAP_GET_CANVAS = 4
+
+V_API, V_EXE = ct.app_ver()
 
 def app_exe_version():
-    return EXE_VER
+    return V_EXE
 
 def app_api_version():
-    return '1.0.'+str(API)
+    return V_API
 
 def app_path(id):
     return ct.app_path(id)
@@ -1252,16 +1284,35 @@ def statusbar_proc(id_bar, id_action, index=-1, tag=0, value=""):
     return ct.statusbar_proc(id_bar, id_action, index, tag, to_str(value))
 
 def canvas_proc(id_canvas, id_action, text='', color=-1, size=-1, x=-1, y=-1, x2=-1, y2=-1, style=-1, p1=-1, p2=-1):
+    if isinstance(text, (tuple, list)):
+        text = ','.join(map(str, text))
     return ct.canvas_proc(id_canvas, id_action, text, color, size, x, y, x2, y2, style, p1, p2)
 
+def bitmap_proc(id_bmp, id_action, param1=0, param2=0):
+    return ct.bitmap_proc(id_bmp, id_action, param1, param2)
+
 def _timer_proc_callback_proxy(tag='', info=''):
-    if info in _live:
-        return _live[info](tag)
+    cb = _live.get(info)
+    if cb is None:
+        return
+    # one-shot: drop before calling so a re-arm inside the callback re-registers cleanly
+    if info in _one_shot:
+        _one_shot.discard(info)
+        _live.pop(info, None)
+    return cb(tag)
 
 def timer_proc(id, callback, interval, tag=''):
     if callable(callback):
         sid_callback = str(callback)
-        _live[sid_callback] = callback
+        if id in (TIMER_STOP, TIMER_DELETE):
+            _live.pop(sid_callback, None)
+            _one_shot.discard(sid_callback)
+        else:
+            _live[sid_callback] = callback
+            if id == TIMER_START_ONE:
+                _one_shot.add(sid_callback)
+            else:
+                _one_shot.discard(sid_callback)
         callback = 'module={};func=_timer_proc_callback_proxy;info="{}";'.format(__name__, sid_callback)
     return ct.timer_proc(id, callback, interval, tag)
 
@@ -1381,8 +1432,14 @@ class Editor:
     def get_char_count(self, max_chars, max_time):
         return ct.ed_get_char_count(self.h, max_chars, max_time)
 
-    def get_text_all(self):
-        return ct.ed_get_text_all(self.h)
+    def get_line_end(self, index):
+        return ct.ed_get_line_end(self.h, index)
+
+    def set_line_end(self, index, val):
+        return ct.ed_set_line_end(self.h, index, val)
+
+    def get_text_all(self, ends=False):
+        return ct.ed_get_text_all(self.h, ends)
 
     def set_text_all(self, text):
         return ct.ed_set_text_all(self.h, esc_z(text))
@@ -1441,8 +1498,8 @@ class Editor:
     def bookmark(self, id, nline, nkind=1, ncolor=-1, text='', auto_del=True, show=True, tag=0):
         return ct.ed_bookmark(self.h, id, nline, nkind, ncolor, text, auto_del, show, tag)
 
-    def decor(self, id, line=-1, tag=0, text='', color=0, bold=False, italic=False, image=-1, auto_del=True):
-        return ct.ed_decor(self.h, id, line, tag, text, color, bold, italic, image, auto_del)
+    def decor(self, id, line=-1, tag=0, text='', color=0, style='', image=-1, auto_del=True):
+        return ct.ed_decor(self.h, id, line, tag, text, color, style, image, auto_del)
 
     def lock(self):
         return ct.ed_lock(self.h)
@@ -1501,7 +1558,7 @@ class Editor:
              color_font='', color_bg='', color_border='',
              font_bold='', font_italic='', font_strikeout='',
              border_left=0, border_right=0, border_down=0, border_up=0,
-             show_on_map=False, map_only=0
+             show_on_map=-1, map_only=0
              ):
 
         def f(x):
@@ -1529,8 +1586,8 @@ class Editor:
     def get_token(self, id, index1=0, index2=0):
         return ct.ed_get_token(self.h, id, index1, index2)
 
-    def gap(self, id, num1, num2, tag=-1, size=0, color=COLOR_NONE):
-        return ct.ed_gap(self.h, id, num1, num2, tag, size, color)
+    def gap(self, id, num1, num2, tag=-1, size=0, color=COLOR_NONE, on_top=False):
+        return ct.ed_gap(self.h, id, num1, num2, tag, size, color, on_top)
 
     def folding(self, id, index=-1, item_x=-1, item_y=-1, item_y2=-1, item_staple=False, item_hint='', item_x2=0, item_tag=0):
         return ct.ed_folding(self.h, id, index, item_x, item_y, item_x2, item_y2, item_staple, item_hint, item_tag)

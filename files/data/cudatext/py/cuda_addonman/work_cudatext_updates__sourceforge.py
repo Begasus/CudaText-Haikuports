@@ -21,11 +21,12 @@ if (TEXT_OS == 'linux') and (TEXT_CPU == 'amd64'):
             if s in desc:
                 DEBIAN_UBUNTU = True
                 break
-    except:
+    except Exception:
         pass
 
 DOWNLOAD_PAGE = 'https://sourceforge.net/projects/cudatext/files/release/'
-VERSION_REGEX = r'\b1\.\d{2,3}\.\d+\.\d+\b'
+VERSION_REGEX = r'\b1\.\d{2,3}\.\d{1,2}\.\d{1,2}\b'
+
 if DEBIAN_UBUNTU:
     DOWNLOAD_REGEX = \
         r' href="(\w+://[\w\.]+/projects/cudatext/files/release/([\d\.]+)/cudatext_([\d\.\-]+)_'+ \
@@ -41,6 +42,8 @@ REGEX_GROUP_VER = 1
 
 CHANGELOG_PAGE = 'https://cudatext.github.io/history.txt'
 
+COUNT_OF_LAST_VERSIONS = 5
+
 def versions_ordered(s1, s2):
     """
     compare "1.10.0" and "1.9.0" correctly
@@ -54,7 +57,7 @@ def check_cudatext():
 
     fn = os.path.join(get_temp_dir(), 'download.html')
     url = DOWNLOAD_PAGE
-    app.msg_status(_('Downloading: ')+url, True)
+    # app.msg_status(_('Downloading: ')+url, True)
     get_url(url, fn, True)
     app.msg_status('')
 
@@ -64,25 +67,41 @@ def check_cudatext():
 
     text = open(fn, encoding='utf8').read()
     items = re.findall(VERSION_REGEX, text)
+    # unique and sort
+    items = list(dict.fromkeys(items))
     if not items:
         app.msg_status(_('Cannot find app version: '+url))
         return
 
-    items = sorted(items, reverse=True)
-    s_version = items[0]
-    print(_('Found last version: ')+s_version)
+    i = 0
+    versions = sorted(items, reverse=True)
+    versions_len = len(versions)
+    while True:
+        if i < versions_len:
+            s_version = versions[i]
+        else:
+            return
 
-    url = DOWNLOAD_PAGE+s_version+'/'
-    app.msg_status(_('Downloading: ')+url, True)
-    get_url(url, fn, True)
-    app.msg_status('')
+        url = DOWNLOAD_PAGE+s_version+'/'
+        app.msg_status(_('Downloading: ')+url, True)
+        get_url(url, fn, True)
+        app.msg_status('')
 
-    if not os.path.isfile(fn):
-        app.msg_status(_('Cannot download: ')+url)
-        return
+        if not os.path.isfile(fn):
+            app.msg_status(_('Cannot download: ')+url)
+            return
 
-    text = open(fn, encoding='utf8').read()
-    items = re.findall(DOWNLOAD_REGEX, text)
+        text = open(fn, encoding='utf8').read()
+        items = re.findall(DOWNLOAD_REGEX, text)
+        if not items:
+            i += 1
+        else:
+            print(_('Found last version: ')+s_version)
+            break
+
+        if i > COUNT_OF_LAST_VERSIONS:
+            break
+
     if not items:
         app.msg_status(_('Cannot find links: '+url))
         return

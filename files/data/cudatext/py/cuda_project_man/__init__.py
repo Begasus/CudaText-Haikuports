@@ -66,7 +66,7 @@ def _file_ext(fn):
 def _file_editor(fn):
     for h in ed_handles():
         e = Editor(h)
-        if e.get_filename('*')==fn:
+        if e.get_prop(PROP_FN, '*')==fn:
             return e
     return None
 
@@ -177,7 +177,7 @@ def is_hidden(s):
         return is_hidden_win32(s)
         #try:
         #    return bool(os.stat(s).st_file_attributes & stat.FILE_ATTRIBUTE_HIDDEN)
-        #except:
+        #except Exception:
         #    return True
 
     else:
@@ -223,8 +223,11 @@ class Command:
 
         (_("Add folder..."), "nodes", [None, NODE_PROJECT, NODE_DIR, NODE_FILE, NODE_BAD], "cuda_project_man.action_add_folder", ""),
         (_("Add file..."), "nodes", [None, NODE_PROJECT, NODE_DIR, NODE_FILE, NODE_BAD], "cuda_project_man.action_add_file", ""),
-        (_("Clear project"), "nodes", [None, NODE_PROJECT, NODE_DIR, NODE_FILE, NODE_BAD], "cuda_project_man.action_clear_project", ""),
-        (_("Remove node"), "nodes", [None, NODE_PROJECT, NODE_DIR, NODE_FILE, NODE_BAD], "cuda_project_man.action_remove_node", ""),
+        ("-", "nodes", [None, NODE_PROJECT, NODE_DIR, NODE_FILE, NODE_BAD], "", ""),
+        (_("Clear project..."), "nodes", [None, NODE_PROJECT, NODE_DIR, NODE_FILE, NODE_BAD], "cuda_project_man.action_clear_project", ""),
+        ("-", "nodes", [None, NODE_PROJECT, NODE_DIR, NODE_FILE, NODE_BAD], "", ""),
+        (_("Remove root node"), "nodes", [None, NODE_PROJECT, NODE_DIR, NODE_FILE, NODE_BAD], "cuda_project_man.action_remove_node", ""),
+        (_("Remove deleted root nodes..."), "nodes", [None, NODE_PROJECT, NODE_DIR, NODE_FILE, NODE_BAD], "cuda_project_man.action_remove_deleted_nodes", ""),
 
         (_("New file..."), "dir", [NODE_DIR], "cuda_project_man.action_new_file", S_CTRL_NAME + "+N"),
         (_("New folder..."), "dir", [NODE_DIR], "cuda_project_man.action_new_directory", "F7"),
@@ -243,7 +246,7 @@ class Command:
         (_("Find in folder..."), "dir", [NODE_DIR], "cuda_project_man.action_find_in_directory", ""),
         ("-", "dir", [NODE_DIR], "", ""),
         (_("Focus in file manager"), "dir", [NODE_DIR], "cuda_project_man.action_focus_in_fileman", ""),
-        (_("Properties..."), "dir", [NODE_DIR], "cuda_project_man.action_get_properties", ""),
+        (_("Properties..."), "dir", [NODE_DIR], "cuda_project_man.action_get_properties", "Alt+Enter"),
 
         (_("Open in default application"), "file", [NODE_FILE], "cuda_project_man.action_open_def", ""),
         ("-", "file", [NODE_FILE], "", ""),
@@ -260,7 +263,7 @@ class Command:
         ("-", "file", [NODE_FILE], "", ""),
         (_("Focus in file manager"), "file", [NODE_FILE], "cuda_project_man.action_focus_in_fileman", ""),
         (_("Set as main file"), "file", [NODE_FILE], "cuda_project_man.action_set_as_main_file", ""),
-        (_("Properties..."), "file", [NODE_FILE], "cuda_project_man.action_get_properties", ""),
+        (_("Properties..."), "file", [NODE_FILE], "cuda_project_man.action_get_properties", "Alt+Enter"),
 
         ("-"   , "", [None, NODE_PROJECT, NODE_DIR, NODE_FILE, NODE_BAD], "", ""),
         (_("Refresh"), "", [None, NODE_PROJECT, NODE_DIR, NODE_FILE, NODE_BAD], "cuda_project_man.action_refresh", "F5"),
@@ -662,7 +665,7 @@ class Command:
         # fix filename of existing ui-tab
         for h in ed_handles():
             e = Editor(h)
-            if e.get_filename('*')==str(location):
+            if e.get_prop(PROP_FN, '*')==str(location):
                 e.save(str(new_location))
 
         self.action_refresh()
@@ -796,13 +799,20 @@ class Command:
         dlg_proc(h, DLG_PROP_SET, prop={
             'w': w_,
             'h': h_,
+            'w_min': 300,
+            'h_min': 150,
             'cap': caption,
-            'border': DBORDER_DIALOG,
+            'border': DBORDER_SIZE,
         })
 
         n = dlg_proc(h, DLG_CTL_ADD, prop='button')
         dlg_proc(h, DLG_CTL_PROP_SET, index=n, prop={
             'name': 'btn_ok',
+            'a_l': None,
+            'a_t': None,
+            'a_r': ('', ']'),
+            'a_b': ('', ']'), 
+            'sp_a': 6,
             'x': w_-100,
             'y': h_-6-25,
             'w': 100-6,
@@ -815,6 +825,8 @@ class Command:
         dlg_proc(h, DLG_CTL_PROP_SET, index=n, prop={
             'name': 'memo_log',
             'val': text,
+            'a_r': ('btn_ok', ']'),
+            'a_b': ('btn_ok', '['), 
             'x': 6,
             'y': 6,
             'w': w_-6*2,
@@ -1006,7 +1018,7 @@ class Command:
                         nodes = Path(fn).iterdir()
                     else:
                         nodes = sorted(Path(fn).iterdir(), key=Command.node_ordering)
-            except:
+            except Exception:
                 tree_proc(self.tree, TREE_ITEM_SET_ICON, parent, image_index=self.ICON_BAD)
                 raise # good to see the error
                 return
@@ -1019,7 +1031,7 @@ class Command:
                 spath = path.path
             is_dir = path.is_dir()
             sname = path.name
-            if is_win_root(spath):
+            if is_win_root(spath) or (not sname):
                 sname = spath
             elif self.options.get("no_hidden", True) and is_hidden(spath):
                 continue
@@ -1163,17 +1175,49 @@ class Command:
                 break
             index = prop["parent"]
 
+        # fix for network UNC paths '\\server\share\'
+        if path.endswith('\\'):
+            path = path[:-1]
+
         tree_proc(self.tree, TREE_ITEM_DELETE, index)
-        if str(path) in self.project["nodes"]:
-            self.project["nodes"].remove(str(path))
-            if (self.cur_dir+os.sep).startswith(str(path)+os.sep):
+        if path in self.project["nodes"]:
+            self.project["nodes"].remove(path)
+            if (self.cur_dir+os.sep).startswith(path+os.sep):
                 app_proc(PROC_SET_FOLDER, '')
                 self.cur_dir = ''
+        else:
+            msg_box(_('Cannot find path "%s" in root nodes list') % path, MB_OK or MB_ICONERROR)
 
         if self.project_file_path:
             self.action_save_project_as(self.project_file_path)
 
+    def action_remove_deleted_nodes(self):
+
+        if msg_box(_("Remove deleted nodes?"), MB_OKCANCEL + MB_ICONWARNING) != ID_OK:
+            return
+
+        nodes_deleted = []
+        for node in self.project["nodes"]:
+            path_ = Path(node)
+            if not path_.exists():
+                self.project["nodes"].remove(str(path_))
+                nodes_deleted.append(str(path_))
+
+        if len(nodes_deleted) > 0:
+            msg = ', '.join(nodes_deleted)
+            self.action_refresh()
+
+            if self.project_file_path:
+                self.action_save_project_as(self.project_file_path)
+        else:
+            msg = '-'
+
+        msg_status(_("[Project] Remove deleted nodes: ") + msg)
+
     def action_clear_project(self):
+
+        if msg_box(_("Clear project?"), MB_OKCANCEL + MB_ICONWARNING) != ID_OK:
+            return
 
         self.session_forget()
         self.session_delete_all()
@@ -1429,12 +1473,14 @@ class Command:
             if self.options.get('on_start', False):
                 ev.append('on_start')
 
+            '''
             v = self.options.get('check_git', None)
             if v is None:
                 s = ini_read('plugins.ini', 'events', 'cuda_project_man', '')
                 v = 'on_open' in s
             if v:
                 ev.append('on_open')
+            '''
 
             # save events to plugins.ini [events], they will work additionally to install.inf events
             if ev:
@@ -1498,6 +1544,10 @@ class Command:
     def contextmenu_remove_node(self):
         self.init_panel()
         self.action_remove_node()
+
+    def contextmenu_remove_deleted_nodes(self):
+        self.init_panel()
+        self.action_remove_deleted_nodes()
 
     def contextmenu_clear_proj(self):
         self.init_panel()
@@ -1709,7 +1759,7 @@ class Command:
             msg_status(_('Project not loaded'))
             return
 
-        fn = ed.get_filename('*')
+        fn = ed.get_prop(PROP_FN, '*')
         if fn:
             if self.jump_to_filename(fn): #gets False if found
                 msg_status(_('Cannot jump to file: ') + collapse_filename(fn))
@@ -1765,6 +1815,9 @@ class Command:
             return
 
         _file_open(str(path), options=options)
+
+        # avoid stealing focus by editor
+        dlg_proc(self.h_dlg, DLG_FOCUS)
 
 
     def get_open_options(self):
@@ -1889,13 +1942,16 @@ class Command:
         elif (data == S_CTRL_API and (id_ctl in (ord('v'), ord('V')))):
             self.action_paste()
             return False #block key
+        elif (data == 'a' and id_ctl == VK_ENTER):
+            self.action_get_properties()
+            return False #block key
 
     def add_current_file(self):
 
         if not self.tree:
             self.init_panel(False)
 
-        fn = ed.get_filename('*')
+        fn = ed.get_prop(PROP_FN, '*')
         self.add_node(fn)
 
     def add_current_dir(self):
@@ -1903,7 +1959,7 @@ class Command:
         if not self.tree:
             self.init_panel(False)
 
-        fn = ed.get_filename('*')
+        fn = ed.get_prop(PROP_FN, '*')
         if fn:
             d = os.path.dirname(fn)
             if not (IS_WIN and d.endswith(':\\')):
@@ -1916,7 +1972,7 @@ class Command:
 
         for h in ed_handles():
             e = Editor(h)
-            fn = e.get_filename('*')
+            fn = e.get_prop(PROP_FN, '*')
             self.add_node(fn)
 
 
@@ -1978,16 +2034,18 @@ class Command:
         for (i, fn) in enumerate(files):
             _file_open(fn, options="/nontext-cancel")
             if i%10==0:
-                app_idle(False)
+                app_proc(PROC_IDLE, False)
 
     def on_open(self, ed_self):
 
+        '''
         if self.options.get('check_git', False):
             self.init_panel(False)
 
             if not self.project_file_path:
-                fn = ed_self.get_filename('*')
+                fn = ed_self.get_prop(PROP_FN, '*')
                 self.action_project_for_git(fn)
+        '''
 
         self.on_tab_change(ed_self)
 
@@ -2230,7 +2288,7 @@ class Command:
         res = []
         for h in ed_handles():
             e = Editor(h)
-            fn = e.get_filename('*')
+            fn = e.get_prop(PROP_FN, '*')
 
             #skip empty tabs
             if (not fn) and (not e.get_text_all()):

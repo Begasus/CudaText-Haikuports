@@ -7,7 +7,7 @@
   "EdDisableBg": "#E0E0E0",
   "EdLinks": "#5050C0",
   "EdLockedBg": "#F0F0F0",
-  "EdCaret": "#000000",
+  "EdCarets": "",
   "EdMarkers": "#D06060",
   "EdCurLineBg": "#F0F0EA",
   "EdCurLineBg2": "",

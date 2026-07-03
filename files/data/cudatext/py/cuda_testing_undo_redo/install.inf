@@ -1,0 +1,21 @@
+[info]
+title=Testing of undo/redo
+desc=undo/redo regression suite
+type=cudatext-plugin
+subdir=cuda_testing_undo_redo
+homepage=https://github.com/Alexey-T/CudaText/issues/6443 https://github.com/Alexey-T/ATSynEdit/issues/368
+
+[item1]
+section=commands
+caption=Testing\Testing of undo/redo\Run all tests
+method=run_all
+
+[item2]
+section=commands
+caption=Testing\Testing of undo/redo\Run single test
+method=run_single
+
+[item3]
+section=commands
+caption=Testing\Testing of undo/redo\Help
+method=about
