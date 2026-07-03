@@ -308,6 +308,8 @@ PROP_TAB_TITLE_REASON   = 163
 PROP_RULER_TEXT         = 164
 PROP_UNPRINTED_WRAPS    = 165
 PROP_LEXER_BUSY         = 166
+PROP_LINE_SPACE1        = 167
+PROP_LINE_SPACE2        = 168
 
 PROP_CORNER_TEXT          = 170
 PROP_CORNER_COLOR_FONT    = 171
@@ -369,7 +371,7 @@ PROC_SIDEPANEL_GET         = 31
 PROC_SIDEPANEL_SET_PROP    = 32
 PROC_SIDEPANEL_GET_IMAGELIST = 33
 #
-PROC_GET_FINDER_BUTTONS = 35
+PROC_GET_FINDER_HANDLES= 35
 PROC_GET_FINDER_PROP   = 36
 PROC_SET_FINDER_PROP   = 37
 PROC_SPLITTER_GET      = 38
@@ -1529,8 +1531,8 @@ class Editor:
     def get_token(self, id, index1=0, index2=0):
         return ct.ed_get_token(self.h, id, index1, index2)
 
-    def gap(self, id, num1, num2, tag=-1, size=0, color=COLOR_NONE):
-        return ct.ed_gap(self.h, id, num1, num2, tag, size, color)
+    def gap(self, id, num1, num2, tag=-1, size=0, color=COLOR_NONE, on_top=False):
+        return ct.ed_gap(self.h, id, num1, num2, tag, size, color, on_top)
 
     def folding(self, id, index=-1, item_x=-1, item_y=-1, item_y2=-1, item_staple=False, item_hint='', item_x2=0, item_tag=0):
         return ct.ed_folding(self.h, id, index, item_x, item_y, item_x2, item_y2, item_staple, item_hint, item_tag)

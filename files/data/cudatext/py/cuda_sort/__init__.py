@@ -300,6 +300,38 @@ class Command:
     def sort_sep_values(self):
         do_sort_sep_values()
 
+    def sort_json(self):
+        import json
+
+        ed.set_text_all(
+            json.dumps(
+                json.loads(ed.get_text_all()),
+                sort_keys=True,
+                indent=2
+            )
+        )
+
+        msg_status(_('Sorted JSON-data based on keys (File -> Reopen for Undo)'))
+
+    def sort_json_field(self):
+        import json
+
+        res = dlg_input('Sort field:', '')
+        if not res: return
+
+        data = json.loads(ed.get_text_all())
+        data.sort(key=lambda item: item[res])
+
+        ed.set_text_all(
+            json.dumps(
+                data,
+                sort_keys=True,
+                indent=2
+            )
+        )
+
+        msg_status(_('Sorted JSON-data based on key "' + res + '" (File -> Reopen for Undo)'))
+
     def config(self):
 
         op_sort_all = ini_read(CONFIG_FN, CONFIG_SECTION, 'allow_sort_all_when_none_selected', '1')

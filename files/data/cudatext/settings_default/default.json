@@ -1,5 +1,5 @@
-//Config default.json is for copying parts to user.json,
-//it's not read as actual config. Config user.json is read.
+//File "default.json" is for copying parts to "user.json",
+//it's not read as actual config. Config "user.json" is read.
 //
 //Some options have suffix for OS:
 //  Windows: empty
@@ -146,10 +146,6 @@
   //Note: this option is global, not per-lexer.
   "unicode_proportional": true,
 
-  //If "unicode_proportional":false, sets width (in %) of full-width characters.
-  //Note: this option is global, not per-lexer.
-  "unicode_full_width": 190,
-
   //Horizontal alignment of inter-line gap bitmaps, which are inserted by "Insert Pics" plugin.
   //  -2: Right aligned
   //  -1: Centered
@@ -157,10 +153,13 @@
   "gap_bitmap_align": -1,
 
   //[UI]
-  //Double-buffering of UI controls. [has suffix]
-  //  Use only if problems with rendering.
-  //  If app shows flickering, change to true.
-  //  If high-DPI monitor (e.g. Retina) shows blurred text, change to false.
+  //Double-buffering of the editor control and other GUI controls. [has suffix]
+  //Use it if you see problems with rendering:
+  //a) If the app shows flickering, change to true.
+  //b) If a high-DPI monitor shows blurred text, change to false.
+  //Also, it makes sense to turn this option off on Windows/Linux to reduce memory
+  //usage by the bitmap buffer (the bitmap buffer takes about 10 MB per UI tab at
+  //large window sizes like 2500x2000).
   "ui_buffered": true,
   "ui_buffered__linux": true,
   "ui_buffered__mac": false,
@@ -314,6 +313,8 @@
   //1) Lexer parsing runs 1.5-3 times faster.
   //2) Code-tree is disabled.
   //3) Code-tree helpers (written in Python and Pascal) are disabled.
+  //So, this option, if set to absurd value 0, effectively disables the folding,
+  //speeds up the lexer parsing, and reduces memory usage.
   //Note: this option is global, not per-lexer.
   "lexer_folding_max_lines": 15000,
 
@@ -1383,9 +1384,11 @@
   //    lexer  : Lexer name.
   //    tabsize: Tab-char kind and size.
   //    ins    : Insert/Overwrite mode (toggled by Ins key).
-  //    selmode: Current selection mode.
-  //             Shows "-" for normal selection mode, "||" for column selection mode.
-  //             Additionally shows "RO" when document has read-only state.
+  //    selmode: Special selection mode. Possible strings:
+  //               "-" for normal selection mode,
+  //               "MouseCol" for mouse column selection without Alt-key,
+  //               "KeybdCol" for keyboard column selection without Alt-key.
+  //    ro     : Shows "RO" when read-only mode is on, otherwise "-".
   //    wrap   : Word-wrap mode.
   //             Shows one of 3 icons: no wrap, wrap at window edge, wrap at fixed margin.
   //    zoom   : Text scale in %.
@@ -1397,7 +1400,7 @@
   //    L: left
   //    R: right
   //    A: auto-sized (width adjusts to text)
-  "ui_statusbar_panels": "caret,C,180|enc,C,125|ends,A,|lexer,C,140|tabsize,A,|selmode,A,|msg,L,",
+  "ui_statusbar_panels": "caret,C,180|enc,C,125|ends,A,|lexer,C,140|tabsize,A,|msg,L,",
 
   //Statusbar message is shown for the specified time, in seconds.
   //After that, message becomes grayed.
@@ -1465,9 +1468,9 @@
   "ui_lexer_themes": true,
 
   //[View/Web]
-  //Underline HTML color codes (like #008080, #0a0) in these file extensions,
-  //comma-separated, without dot. "*" for all files, empty str to disable.
-  "underline_color_files": "*",
+  //Underline HTML color codes, like #008080 / #0a0 / rgb(100, 0, 50).
+  //Option should be used in lexer-specific config.
+  "underline_color": false,
 
   //How to paint HTML color codes:
   //  value<10: paint the underline of specified width, in pixels

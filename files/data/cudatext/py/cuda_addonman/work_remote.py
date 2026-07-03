@@ -21,17 +21,14 @@ def get_url(url, fn, del_first=False):
         if url.startswith('https://sourceforge.net/projects/'):
             url += '/download?use_mirror='+opt.sf_mirror
 
+    fn_show = os.path.basename(url)
     fn_temp = fn+'.download'
     if os.path.isfile(fn_temp):
         os.remove(fn_temp)
     if del_first and os.path.isfile(fn):
         os.remove(fn)
 
-    if opt.proxy:
-        proxies = { 'http': opt.proxy, 'https': opt.proxy, }
-    else:
-        proxies = None
-    #print('proxy', proxies)
+    proxies = { 'http': opt.proxy, 'https': opt.proxy, } if opt.proxy else None
 
     if not opt.verify_https:
         requests.packages.urllib3.disable_warnings()
@@ -39,11 +36,29 @@ def get_url(url, fn, del_first=False):
     while True:
         try:
             r = requests.get(url, proxies=proxies, verify=opt.verify_https, stream=True, timeout=opt.download_timeout)
+
+            size_all = int(r.headers.get('content-length', 0))
+            size_got = 0
+            percent = 0
+            app.app_proc(app.PROC_PROGRESSBAR, 0)
+            if fn_show:
+                app.msg_status(_('Downloading: ')+(('"'+fn_show+'"') if fn_show else url))
+                app.app_idle()
+
             with open(fn_temp, 'wb') as f:
-                for chunk in r.iter_content(chunk_size=1024):
+                for chunk in r.iter_content(chunk_size=4*1024):
                     if chunk: # filter out keep-alive new chunks
                         f.write(chunk)
-                        #f.flush() commented by recommendation
+                        size_got += len(chunk)
+                        if size_all > 0:
+                            perc = size_got * 100 // size_all // 4 * 4
+                            if perc != percent:
+                                percent = perc
+                                app.app_proc(app.PROC_PROGRESSBAR, percent)
+                                app.app_idle()
+
+            app.app_proc(app.PROC_PROGRESSBAR, -1)
+            app.app_idle()
 
             if os.path.isfile(fn_temp):
                 if os.path.getsize(fn_temp)==0:
@@ -56,9 +71,12 @@ def get_url(url, fn, del_first=False):
         except Exception as e:
             res = app.msg_box(_('Cannot download:\n{}\n{}\n\nRetry?').format(url, str(e)),
                 app.MB_ABORTRETRYIGNORE + app.MB_ICONWARNING)
-            if res==app.ID_IGNORE: return
-            if res==app.ID_ABORT: return False
-            if res==app.ID_CANCEL: return False
+            if res != app.ID_RETRY:
+                app.app_proc(app.PROC_PROGRESSBAR, -1)
+            if res == app.ID_IGNORE:
+                return
+            if res in (app.ID_ABORT, app.ID_CANCEL):
+                return False
 
 
 def is_file_html(fn):

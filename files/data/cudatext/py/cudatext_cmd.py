@@ -61,6 +61,10 @@ cCommand_ColSelectWithoutKey_Toggle = 132
 cCommand_RemoveFirstCaret = 135
 cCommand_RemoveLastCaret = 136
 
+cCommand_KeyboardColSelectWithoutKey_On = 137
+cCommand_KeyboardColSelectWithoutKey_Off = 138
+cCommand_KeyboardColSelectWithoutKey_Toggle = 139
+
 cCommand_TextInsert = 150
 cCommand_TextInsertTabChar = 151
 cCommand_KeyBackspace = 152
@@ -156,16 +160,12 @@ cCommand_ToggleOverwrite = 300
 cCommand_ToggleReadOnly = 301
 cCommand_ToggleWordWrap = 302
 cCommand_ToggleUnprinted = 303
-cCommand_ToggleUnprintedSpaces = 304
-cCommand_ToggleUnprintedEnds = 305
-cCommand_ToggleUnprintedEndDetails = 306
 cCommand_ToggleLineNums = 307
 cCommand_ToggleFolding = 308
 cCommand_ToggleRuler = 309
 cCommand_ToggleMinimap = 310
 cCommand_ToggleMicromap = 311
 cCommand_ToggleWordWrapAlt = 312
-cCommand_ToggleUnprintedSpacesTrailing = 320
 
 cCommand_Sort_Asc        = 330
 cCommand_Sort_AscNoCase  = 331
